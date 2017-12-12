@@ -39,29 +39,47 @@
 #include "stdlib.h"
 
 #include "ATProtocol.h"
+#include "ACC_Detect.h"
 
-/*********************************************************************/
-/* File level pragmas                                                */
-/*********************************************************************/ 
 /*********************************************************************/
 /* Constant and Macro Definitions using #define                      */
 /*********************************************************************/
 /*USER DEFINITION*/
 #define UDS_RECEIVE_PAYLOAD_LENGTH  (uint8_t)64
 #define UDS_SEND_DATA_LENGTH        (uint8_t)64
-/* uds data type define */
+/* UDS data type define */
 #define UDS_DATA_TYPE_SINGLE        (uint8_t)0
 #define UDS_DATA_TYPE_FIRST         (uint8_t)1
 #define UDS_DATA_TYPE_CONSECUTIVE   (uint8_t)2
 #define UDS_DATA_TYPE_FLOWCONTROL   (uint8_t)3
 
 
-/* uds service type */
+/* UDS service type */
 #define UDS_SRV_TYPE_SESSION_CTRL   (uint8_t)0x10   //session control service
+#define UDS_SRV_TYPE_ECURESET		(uint8_t)0x11	//ECU reset
 #define UDS_SRV_TYPE_SECURITY_ACS   (uint8_t)0x27   //security access service
+#define UDS_SRV_TYPE_COM_CTRL		(uint8_t)0x28   //communication control
+#define UDS_SRV_TYPE_TESTER_PRESENT (uint8_t)0x3E   //tester present
+#define UDS_SRV_TYPE_CTRL_DCT_SET	(uint8_t)0x85	//control DTC setting
+
 #define UDS_SRV_TYPE_RD_BY_ID       (uint8_t)0x22   //read data by id service
+#define UDS_SRV_TYPE_RD_MEM_BY_AD	(uint8_t)0x23   //read memory by address
+#define UDS_SRV_TYPE_RD_BY_PDID		(uint8_t)0x2A	//read data by periodic identifier
+#define UDS_SRV_TYPE_DYDEF_DATA_ID  (uint8_t)0x3C 	//dynamically define data identifier
 #define UDS_SRV_TYPE_WR_BY_ID       (uint8_t)0x2E   //write data by id service
+#define UDS_SRV_TYPE_WR_MEM_BY_AD	(uint8_t)0x3D	//write memory by address
 #define UDS_SRV_TYPE_TESTER_HOLDON  (uint8_t)0x3E   //test tool keep connection service
+
+#define UDS_SRV_TYPE_RD_DTC_INFO	(uint8_t)0x19	//read DTC information
+#define UDS_SRV_TYPE_CL_DIAG_INFO	(uint8_t)0x14	//clear diagnostic information
+
+#define UDS_SRV_TYPE_IO_CTRL_BY_ID	(uint8_t)0x27 	//input output control by identifier
+
+#define USD_SRV_TYPE_ROUTINE_CTRL	(uint8_t)0x31	//routine control
+
+#define UDS_SRV_TYPE_REQ_DOWLOAD	(uint8_t)0x34	//request download
+#define UDS_SRV_TYPE_DATA_TRANS		(uint8_t)0x36	//transfer data
+#define UDS_SRV_TYPE_REQ_EXT_TRANS	(uint8_t)0x37	//request transfer exit
 /* uds session type */
 #define UDS_SESSION_TYPE_DEFAULT    (uint8_t)0x01   //default session
 #define UDS_SESSION_TYPE_FLUSH      (uint8_t)0x02   //flush session
@@ -147,7 +165,7 @@ static const void_int16_fptr event_handler[DIAG_NUM_EVENTS] =
 /*********************************************************************/
 
 /*********************************************************************/
-/* ROM Const Variables With File Level Scope                         */
+/* ROM const Variables With File Level Scope                         */
 /*********************************************************************/
 
 /*********************************************************************/
@@ -428,7 +446,6 @@ static bool diag_uds_diagSimState(void)
     uds_tx_buffer.data[2] = uds_rx_buffer.payload[1];
     uds_tx_buffer.data[3] = uds_rx_buffer.payload[2];
     uds_tx_buffer.data[4] = IOT_IsSimReady();
-    //memset(&uds_tx_buffer.data[5], 0, 3);
     uds_tx_buffer.length = 5;
     return true;
 }
@@ -609,7 +626,6 @@ static bool diag_uds_readAcc(void)
     uds_tx_buffer.data[2] = uds_rx_buffer.payload[1];
     uds_tx_buffer.data[3] = uds_rx_buffer.payload[2];
     uds_tx_buffer.data[4] = ACC_GetStatus();
-    //memset(&uds_tx_buffer.data[5], 0, 3);
     uds_tx_buffer.length = 5;  
     return true;
 }

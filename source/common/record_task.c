@@ -495,6 +495,7 @@ static void recordRlealtimeData(void)
             recordTimer = pdMS_TO_TICKS(recordInteral) + xTaskGetTickCount();
             TelmProt_backupData(pSendBufer);
             vPortFree(pSendBufer);
+            pSendBufer = NULL;
         }
     }
 }

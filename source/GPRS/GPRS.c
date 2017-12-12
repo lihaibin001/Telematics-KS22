@@ -441,8 +441,9 @@ static bool cleanAtCmdQueue(void)
 		if(command.pCommand)
 		{
 			vPortFree(command.pCommand);
+			command.pCommand = NULL;
 		}
-		command.pCommand = NULL;
+
 	}
 
 	return true;
