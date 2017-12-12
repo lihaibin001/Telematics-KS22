@@ -1,0 +1,300 @@
+#include "can_ks22.h"
+#include "string.h"
+/*******************************************************************************
+ * Definitions
+ ******************************************************************************/
+
+#define CAN_TX_MB_NUM               (15)
+/*******************************************************************************
+ * Variables
+ ******************************************************************************/
+flexcan_handle_t                flexcanHandle[CAN_NUM_CHANNELS];
+
+static flexcan_frame_t          CAN_RxframeBuffer[CAN_NUM_CHANNELS];  
+static flexcan_frame_t          CAN_TxFrameBuffer[CAN_NUM_CHANNELS]; 
+static flexcan_mb_transfer_t    txFrameMB[CAN_NUM_CHANNELS] = 
+{
+    {
+        .mbIdx = CAN_TX_MB_NUM,
+        .frame = &CAN_TxFrameBuffer[CAN_CHANNEL0],
+    },
+};
+ 
+/*******************************************************************************
+ * Prototypes
+ ******************************************************************************/
+
+static void CAN_InitIO(CAN_CHANNEL_T chan);
+//static uint8_t CAN_MB_config(uint8_t chan);
+//static uint8_t CAN_StoreFrame(uint8_t chan, flexcan_frame_t *xfer);
+
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
+
+
+/*******************************************************************************
+*    Function: CAN_Initialze
+*
+*  Parameters: chan, spcecify the can channel
+*     Returns: none
+* Description: Initialize the spcecified can channel
+*******************************************************************************/
+void CAN_Initialize(CAN_CHANNEL_T chan, flexcan_transfer_callback_t cb, uint32_t bandrate)
+{
+    if(chan < CAN_NUM_CHANNELS)
+    {
+        CAN_Type *tmpCAN = NULL;
+        flexcan_config_t flexcanConfig;
+        CAN_InitIO(chan);
+        FLEXCAN_GetDefaultConfig(&flexcanConfig);
+        flexcanConfig.clkSrc = kFLEXCAN_ClkSrcPeri;
+        flexcanConfig.baudRate = bandrate;
+        switch(chan)
+        {
+            case CAN_CHANNEL0:
+                tmpCAN = CAN0;
+                break;
+//            case CAN_CHANNEL1:
+//                flexcanConfig.baudRate = CAN1_BANDRATE;
+//                tmpCAN = CAN1;
+                break;
+            default:
+                return;
+        }
+        /* set Priority*/
+        NVIC_SetPriority(CAN0_ORed_Message_buffer_IRQn, 6);
+        /* initialize the specify can channel */
+        FLEXCAN_Init(tmpCAN, &flexcanConfig, CLOCK_GetFreq(kCLOCK_BusClk));
+        /* Create FlexCAN handle structure and set call back function. */
+        FLEXCAN_TransferCreateHandle(tmpCAN, &flexcanHandle[chan], cb, NULL);
+        /* Sets up the transmit message buffer. */
+        FLEXCAN_SetTxMbConfig(tmpCAN, CAN_TX_MB_NUM, true);
+        /* configure the receive FIFO */
+        /* enable the specify can channel */        
+ //       FLEXCAN_Enable(tmpCAN, true);
+    }
+}
+/*******************************************************************************
+*    Function: CAN_SendNoBlocking
+*
+*  Parameters: chan, spcecify the can channel. xfer point to the data buffer
+*     Returns: 0, sucess. 1, parameter error. 2, low lever error 
+* Description: send data without blocking
+*******************************************************************************/
+uint8_t CAN_SendNoBlocking(CAN_CHANNEL_T chan, flexcan_frame_t *frame)
+{
+    if(frame == NULL)
+    {
+        return 1;
+    }
+    else
+    {
+        CAN_Type *CANx = NULL;
+        memcpy(txFrameMB[chan].frame, frame, sizeof(flexcan_frame_t));
+        switch(chan)
+        {
+            case CAN_CHANNEL0:
+                CANx = CAN0;
+                break;
+            default:
+                return 1;
+        }
+        FLEXCAN_TransferSendNonBlocking(CANx, &flexcanHandle[chan], &txFrameMB[chan]);
+        return 0;
+    }
+}
+/*******************************************************************************
+*    Function: CAN_InitIO
+*
+*  Parameters: chan, spcecify the can channel
+*     Returns: none
+* Description: Initialize the spcecified can IO port
+*******************************************************************************/
+static void CAN_InitIO(CAN_CHANNEL_T chan)
+{
+    if(chan < CAN_NUM_CHANNELS)
+    {
+        switch(chan)
+        {
+            case CAN_CHANNEL0:
+                /* Initialize FlexCAN0 pins below */
+                CLOCK_EnableClock(kCLOCK_PortA);
+
+                /* Affects PORTB_PCR18 register */
+                PORT_SetPinMux(PORTA, 12u, kPORT_MuxAlt2);
+                /* Affects PORTB_PCR19 register */
+                PORT_SetPinMux(PORTA, 13u, kPORT_MuxAlt2);
+                break;
+//            case CAN_CHANNEL1:
+//                CLOCK_EnableClock(kCLOCK_PortE);
+//                PORT_SetPinMux(PORTE, 24u, kPORT_MuxAlt2);
+//                PORT_SetPinMux(PORTE, 25u, kPORT_MuxAlt2);
+//                break;
+            default:
+                break;
+        }
+    }
+}
+#if 0
+/*******************************************************************************
+*    Function: CAN_RxFIFOConfig
+*
+*  Parameters: chan, spcecify the can channel. xfer point to the data buffer
+*     Returns: 
+* Description: send data without blocking
+*******************************************************************************/
+void CAN_ReceiveFIFOConfig(CAN_CHANNEL_T chan, CAN_FilterType filter[], uint8_t filterCnt)
+{
+    if(chan < CAN_NUM_CHANNELS)
+    {
+        uint8_t filterIDX;
+        uint32_t rxFifoFilter[filterCnt];
+        for(filterIDX = 0; filterIDX < filterCnt; filterIDX++)
+        {
+            rxFifoFilter[filterIDX] = FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(filter[filterIDX].id,
+                                                                        filter[filterIDX].type,
+                                                                        filter[filterIDX].fromat);
+        }
+         rxFifoFilter[] = { FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0xc0401D0, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0xc0501D0, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0xc0601D0, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1801FFF4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1802FFF4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1803FFF4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1804FFF4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1805FFF4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1806FFF4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1801D2F4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1802D2F4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1803D2F4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1804D2F4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1805D2F4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1806D2F4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1807D2F4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1808D2F4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1809D2F4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x180AD2F4, 0, 1), 
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1851D2F4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0x1850D2F4, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0xc08A7F0, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0xc09A7F0, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0xc0AA7F0, 0, 1),
+                                    FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(0xc0BA7F0, 0, 1)
+                                      
+                                    };
+        flexcan_rx_fifo_config_t rxFifoConfig;
+        flexcan_fifo_transfer_t can_fifo_transfer;
+        CAN_Type *CANx;
+        switch(chan)
+        {
+            case CAN_CHANNEL0:
+                CANx = CAN0;
+                break;
+//            case CAN_CHANNEL1:
+//                CANx = CAN1;
+//                break;
+            default:
+                return;
+        }
+        
+        rxFifoConfig.idFilterTable = rxFifoFilter;
+        rxFifoConfig.idFilterType = kFLEXCAN_RxFifoFilterTypeA;
+        rxFifoConfig.idFilterNum = sizeof(rxFifoFilter) / sizeof(rxFifoFilter[0]);
+        rxFifoConfig.priority = kFLEXCAN_RxFifoPrioHigh;
+        FlEXCAN_SetRxFifoConfig(CANx, &rxFifoConfig, true);
+        can_fifo_transfer.frame = &CAN_RxframeBuffer[chan];       
+        FLEXCAN_TransferReceiveFifoNonBlocking(CANx, &flexcanHandle[chan], &can_fifo_transfer);
+    }
+}
+#endif
+
+
+void CAN_ReceiveFIFOConfig(CAN_CHANNEL_T chan, CAN_FilterType filter[], uint8_t filterCnt)
+{
+    if(chan < CAN_NUM_CHANNELS)
+    {
+        uint8_t filterIDX;
+        uint32_t *rxFifoFilter = malloc(sizeof(CAN_FilterType) * filterCnt);
+        if(rxFifoFilter == NULL)
+        {
+            return;
+        }
+        for(filterIDX = 0; filterIDX < filterCnt; filterIDX++)
+        {
+            rxFifoFilter[filterIDX] = FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_A(filter[filterIDX].id,
+                                                                        filter[filterIDX].type,
+                                                                        filter[filterIDX].format);
+        }
+
+        flexcan_rx_fifo_config_t rxFifoConfig;
+        flexcan_fifo_transfer_t can_fifo_transfer;
+        CAN_Type *CANx;
+        switch(chan)
+        {
+            case CAN_CHANNEL0:
+                CANx = CAN0;
+                break;
+//            case CAN_CHANNEL1:
+//                CANx = CAN1;
+//                break;
+            default:
+                return;
+        }
+        
+        rxFifoConfig.idFilterTable = rxFifoFilter;
+        rxFifoConfig.idFilterType = kFLEXCAN_RxFifoFilterTypeA;
+        rxFifoConfig.idFilterNum = filterCnt;
+        rxFifoConfig.priority = kFLEXCAN_RxFifoPrioHigh;
+        FlEXCAN_SetRxFifoConfig(CANx, &rxFifoConfig, true);
+        can_fifo_transfer.frame = &CAN_RxframeBuffer[chan];       
+        FLEXCAN_TransferReceiveFifoNonBlocking(CANx, &flexcanHandle[chan], &can_fifo_transfer);
+        free(rxFifoFilter);
+    }
+}
+
+#if 0
+/*******************************************************************************
+*    Function: CAN_MB_config
+*
+*  Parameters: 
+*     Returns: 
+* Description: configure the message buffer
+*******************************************************************************/
+static uint8_t CAN_MB_config(uint8_t chan)
+{
+
+    CAN_Type *CANx = NULL;
+    switch(chan)
+    {
+        case CAN_CHANNEL0:
+            CANx = CAN0;
+            break;
+//        case CAN_CHANNEL1:
+//            CANx = CAN1;
+//            break;
+        default:
+            return 1;
+    }
+    
+    /* Setup Rx Message Buffer. */
+    {
+        uint8_t index;
+        flexcan_rx_mb_config_t mbConfig;
+        for(index = 0; index < CAN0_RX_BUFF_QUANTITY; index++)
+        {
+            FLEXCAN_SetRxMbConfig(CANx, index, &mbConfig, false);
+        }
+    }
+    /* Setup Tx Message Buffer. */
+    {
+        uint8_t index;
+        for(index = 0; index < CAN0_TX_BUFF_QUANTITY; index++)
+        {
+            FLEXCAN_SetTxMbConfig(CANx, index + CAN0_RX_BUFF_QUANTITY, true);
+        }
+    }  
+    return 0;
+}
+#endif 
+

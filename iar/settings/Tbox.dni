@@ -1,0 +1,210 @@
+[Stack]
+FillEnabled=0
+OverflowWarningsEnabled=1
+WarningThreshold=90
+SpWarningsEnabled=1
+WarnLogOnly=1
+UseTrigger=1
+TriggerName=main
+LimitSize=0
+ByteLimit=50
+[DebugChecksum]
+Checksum=-1461932583
+[CodeCoverage]
+Enabled=_ 0
+[Exceptions]
+StopOnUncaught=_ 0
+StopOnThrow=_ 0
+[CallStack]
+ShowArgs=0
+[Disassembly]
+MixedMode=1
+[Interrupts]
+Enabled=1
+[MemConfig]
+Base=1
+Manual=0
+Ddf=1
+TypeViol=0
+Stop=1
+[Simulator]
+Freq=10000000
+MultiCoreRunAll=1
+[JLinkDriver]
+CStepIntDis=_ 0
+LeaveTargetRunning=_ 0
+TraceBufferSize=0x00010000
+TraceStallIfFIFOFull=0x00000000
+TracePortSize=0x00000000
+[RecentFlashDownload]
+Path=D:\workspace\TBOX-hengyi\firmware\lihaibin\iar\Debug\Exe\Tbox.out
+[SWOTraceHWSettings]
+OverrideDefaultClocks=0
+CpuClock=72000000
+ClockAutoDetect=0
+ClockWanted=2000000
+JtagSpeed=2000000
+Prescaler=36
+TimeStampPrescIndex=0
+TimeStampPrescData=0
+PcSampCYCTAP=1
+PcSampPOSTCNT=15
+PcSampIndex=0
+DataLogMode=0
+ITMportsEnable=0
+ITMportsTermIO=0
+ITMportsLogFile=0
+ITMlogFile=$PROJ_DIR$\ITM.log
+[InterruptStripe]
+Sort=1
+[struct_types]
+Fmt0=atCmd_tbl_t-timeOut	3	0
+Fmt1=dspi_master_handle_t-rxData	4	0
+Fmt2=dspi_master_handle_t-txData	4	0
+Fmt3=dspi_transfer_t-txData	4	0
+Fmt4=rtc_datetime_t-day	3	0
+Fmt5=rtc_datetime_t-hour	3	0
+Fmt6=rtc_datetime_t-minute	3	0
+Fmt7=rtc_datetime_t-month	3	0
+Fmt8=rtc_datetime_t-second	3	0
+Fmt9=struct __flashInfo-venderId	4	0
+Fmt10=uart_chan_T-rx_in	3	0
+Fmt11=uart_chan_T-tx_in	3	0
+[array_types]
+Fmt0=uint32_t[18]	4	0
+Fmt1=uint8_t[10]	4	0
+Fmt2=uint8_t[16]	4	0
+Fmt3=uint8_t[17]	4	0
+Fmt4=uint8_t[22]	4	0
+Fmt5=uint8_t[250]	4	0
+Fmt6=uint8_t[254]	4	0
+Fmt7=uint8_t[256]	4	0
+Fmt8=uint8_t[298]	4	0
+Fmt9=uint8_t[2]	4	0
+Fmt10=uint8_t[4096]	4	0
+Fmt11=uint8_t[4]	4	0
+Fmt12=uint8_t[8]	4	0
+[watch_formats]
+Fmt0={W}1:*data_len	3	0
+Fmt1={W}1:*sduPtr	4	0
+Fmt2={W}1:AY01_0x1801FFF4_Data	4	0
+Fmt3={W}1:AY01_0x1802FFF4_Data	4	0
+Fmt4={W}1:CanId	4	0
+Fmt5={W}1:IT_Mask	4	0
+Fmt6={W}1:base->MB[mbIdx].CS	4	0
+Fmt7={W}1:canHw	4	0
+Fmt8={W}1:canId	4	0
+Fmt9={W}1:dataLen	3	0
+Fmt10={W}1:dataType	4	0
+Fmt11={W}1:enc_len	3	0
+Fmt12={W}1:filterCnt	3	0
+Fmt13={W}1:filter[filterIDX].id	4	0
+Fmt14={W}1:i	3	0
+Fmt15={W}1:id	4	0
+Fmt16={W}1:id_FrameCnt	3	0
+Fmt17={W}1:ipRxDataIdx	3	0
+Fmt18={W}1:kAPP_PowerModeVlpr	3	0
+Fmt19={W}1:kAPP_PowerModeVlps	3	0
+Fmt20={W}1:key	4	0
+Fmt21={W}1:len	3	0
+Fmt22={W}1:net_state	3	0
+Fmt23={W}1:resetSource	4	0
+Fmt24={W}1:rxFifoFilter[4]	4	0
+Fmt25={W}1:sduPtr	4	0
+Fmt26={W}1:seed	4	0
+Fmt27={W}1:targetPowerMode	3	0
+Fmt28={W}1:timer	3	0
+Fmt29={W}1:total_length	3	0
+Fmt30={W}1:vendorId	4	0
+Fmt31={W}1:waitcount	4	0
+Fmt32={W}42:loginTimes	4	0
+Fmt33={W}42:recordInteral	3	0
+Fmt34={W}42:recordTimer	3	0
+Fmt35={W}42:rx_char_count	3	0
+Fmt36={W}42:tcom_tx_num_bytes	3	0
+Fmt37={W}42:tcp_rx_len	3	0
+[Trace1]
+Enabled=0
+ShowSource=1
+[Trace2]
+Enabled=0
+ShowSource=0
+[SWOTraceWindow]
+PcSampling=0
+InterruptLogs=0
+ForcedTimeStamps=0
+EventCPI=0
+EventEXC=0
+EventFOLD=0
+EventLSU=0
+EventSLEEP=0
+[PowerLog]
+Title_0=I0
+Symbol_0=0 4 0
+LogEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+LiveEnabled=0
+LiveFile=PowerLogLive.log
+[DataLog]
+Title_0=Psync_Task
+Symbol_0=0 4 1
+LogEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+SumEnabled=0
+ShowTimeSum=1
+[EventLog]
+Title_0=Ch3
+Symbol_0=0 4 1
+Title_1=Ch2
+Symbol_1=0 4 1
+Title_2=Ch1
+Symbol_2=0 4 1
+Title_3=Ch0
+Symbol_3=0 4 1
+LogEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+SumEnabled=0
+ShowTimeSum=1
+SumSortOrder=0
+[InterruptLog]
+LogEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+SumEnabled=0
+ShowTimeSum=1
+SumSortOrder=0
+[Log file]
+LoggingEnabled=_ 0
+LogFile=_ ""
+Category=_ 0
+[TermIOLog]
+LoggingEnabled=_ 0
+LogFile=_ ""
+[DriverProfiling]
+Enabled=0
+Mode=1
+Graph=0
+Symbiont=0
+Exclusions=
+[CallStackLog]
+Enabled=0
+[CallStackStripe]
+ShowTiming=1
+[PowerProbe]
+Frequency=10000
+Probe0=I0
+ProbeSetup0=2 1 1 2 0 0
+[Disassemble mode]
+mode=0
+[Breakpoints2]
+Bp0=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\TelmProtocol.c}.687.9" 0 0 1 "" 0 "" 0
+Bp1=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.637.5" 0 0 1 "" 0 "" 0
+Bp2=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.2094.2" 0 0 1 "" 0 "" 0
+Count=3
+[Aliases]
+A0=_ "D:\workspace\TBOX-hengyi\firmware\code0921\devices\MKS22F12\iar\startup_MKS22F12.s" ""
+Count=1
+SuppressDialog=0

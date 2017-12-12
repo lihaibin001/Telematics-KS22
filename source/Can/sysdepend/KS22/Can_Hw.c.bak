@@ -1,0 +1,819 @@
+/* -------------------------------- Arctic Core ------------------------------
+* Arctic Core - the open source AUTOSAR platform http://arccore.com
+*
+* Copyright (C) 2009  ArcCore AB <contact@arccore.com>
+*
+* This source code is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License version 2 as published by the
+* Free Software Foundation; See <http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt>.                                           
+*
+* This program is distributed in the hope that it will be useful, but
+* WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+* or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+* for more details.
+* -------------------------------- Arctic Core ------------------------------*/
+
+/* Modified && Ported by parai to integrated with GaInOS,which is an open source 
+* AUTOSAR OS based on uTenux(tkernel). 
+* And re-construct a GUI tool named gainos-studio,which is based on python and Qt4.8,
+* for the whole Com Architecture of ArCore.
+* URL:      https://github.com/parai
+* Email:    parai@foxmail.com
+* Name:     parai(Wang Fan)
+* from Date:2013-04-08 to $Date: 2013-04-13 13:51:22 $
+* $Revision: 1.1 $
+*/
+#include "fsl_debug_console.h"
+#include "fsl_flexcan.h"
+#include "board.h"
+
+#include "fsl_device_registers.h"
+#include "fsl_common.h"
+#include "pin_mux.h"
+#include "clock_config.h"
+
+#include "Can.h"
+#include "CanIf_Cbk.h"
+#if(CAN_DEV_ERROR_DETECT == STD_ON)
+#include "Det.h"
+#endif
+
+#include "CanIf_Cbk.h"
+
+#include <string.h>
+
+
+
+/* CONFIGURATION NOTES
+* ------------------------------------------------------------------
+* - CanHandleType must be CAN_ARC_HANDLE_TYPE_BASIC
+*   i.e. CanHandleType=CAN_ARC_HANDLE_TYPE_FULL NOT supported
+*   i.e CanIdValue is NOT supported
+* - All CanXXXProcessing must be CAN_ARC_PROCESS_TYPE_INTERRUPT
+*   ie CAN_ARC_PROCESS_TYPE_POLLED not supported
+* - HOH's for Tx are global and Rx are for each controller
+*/
+
+/* IMPLEMENTATION NOTES
+* -----------------------------------------------
+* - A HOH us unique for a controller( not a config-set )
+* - Hrh's are numbered for each controller from 0
+* - loopback in HW NOT supported
+* - Only one transmit mailbox is used because otherwise
+*   we cannot use tx_confirmation since there is no way to know
+*   which mailbox caused the tx interrupt. TP will need this feature.
+* - Sleep,wakeup not fully implemented since other modules lack functionality
+*/
+
+/* ABBREVATIONS
+*  -----------------------------------------------
+* - Can Hardware unit - One or multiple Can controllers of the same type.
+* - Hrh - HOH with receive definitions
+* - Hth - HOH with transmit definitions
+*
+*/
+__no_init uint8_t can_network_active;
+static uint8_t network_sleep_counter = 0;
+//static uint8_t tester_conflict = 0;
+
+
+typedef CAN_Type CAN_HW_t;
+//-------------------------------------------------------------------
+
+/* ######################## Hardware dependent GLOBALs #################### */
+EXPORT Can_GlobalType Can_Global =
+{
+	CAN_UNINIT, 	/* driverState */
+	NULL,			/* config */
+	{				/* canUint */
+		{CANIF_CS_UNINIT,0,{0,},INVALID_PDU_ID},
+		{CANIF_CS_UNINIT,0,{0,},INVALID_PDU_ID}
+	},
+	0u,	/* configured */
+};
+
+/* ####################### MACROs ########################### */
+#if defined(USE_DEM)
+#define VALIDATE_DEM_NO_RV(_exp,_err )                          \
+if( !(_exp) ) {                                             \
+    Dem_ReportErrorStatus(_err, DEM_EVENT_STATUS_FAILED);   \
+        return;                                                 \
+}
+#else
+#define VALIDATE_DEM_NO_RV(_exp,_err )
+#endif
+
+#if ( CAN_DEV_ERROR_DETECT == STD_ON )
+#define VALIDATE(_exp,_api,_err )                   \
+if( !(_exp) ) {                                 \
+    Det_ReportError(MODULE_ID_CAN,0,_api,_err); \
+        return CAN_NOT_OK;                          \
+}
+#define VALIDATE_NO_RV(_exp,_api,_err )             \
+if( !(_exp) ) {                                 \
+    Det_ReportError(MODULE_ID_CAN,0,_api,_err); \
+        return;                                     \
+}
+#define DET_REPORTERROR(_x,_y,_z,_q) Det_ReportError(_x, _y, _z, _q)
+#else
+#define VALIDATE(_exp,_api,_err )
+#define VALIDATE_NO_RV(_exp,_api,_err )
+#define DET_REPORTERROR(_x,_y,_z,_q)
+#endif
+/* ####################### LOCAL FUNCTIONs ########################### */
+static uint32 McuE_GetSystemClock(void)
+{
+    return CLOCK_GetCoreSysClkFreq();
+}
+
+static CAN_HW_t * GetController(int unit)
+{
+    return CAN_BASE_PTRS[uint];
+}
+/**
+* Function that finds the Hoh( HardwareObjectHandle ) from a Hth
+* A HTH may connect to one or several HOH's. Just find the first one.
+*
+* @param hth The transmit handle
+* @returns Ptr to the Hoh
+*/
+static const Can_HardwareObjectType * Can_FindHoh( Can_Arc_HTHType hth , uint32* controller)
+{
+    const Can_HardwareObjectType *hohObj;
+    const Can_ObjectHOHMapType *map;
+    //const Can_ControllerConfigType *canHwConfig;
+    
+    map = &Can_Global.CanHTHMap[hth];
+    
+    // Verify that this is the correct map
+    if (map->CanHOHRef->CanObjectId != hth)
+    {
+        DET_REPORTERROR(MODULE_ID_CAN, 0, 0x6, CAN_E_PARAM_HANDLE);
+    }
+    
+    //canHwConfig= CAN_GET_CONTROLLER_CONFIG(Can_Global.channelMap[map->CanControllerRef]);
+    
+    hohObj = map->CanHOHRef;
+    
+    // Verify that this is the correct Hoh type
+    if ( hohObj->CanObjectType == CAN_OBJECT_TYPE_TRANSMIT)
+    {
+        *controller = map->CanControllerRef;
+        return hohObj;
+    }
+    
+    DET_REPORTERROR(MODULE_ID_CAN, 0, 0x6, CAN_E_PARAM_HANDLE);
+    
+    return NULL;
+}
+
+/* ==================== ISRs ========================================*/
+/**
+* ISR for CAN. Normal Rx/operation
+*
+* @param unit CAN controller number( from 0 )
+*/
+static void Can_FifoRxIsr(int unit) {
+    
+    CAN_HW_t *canHw= GetController(unit);
+    const Can_ControllerConfigType *canHwConfig= CAN_GET_CONTROLLER_CONFIG(Can_Global.channelMap[unit]);
+    Can_UnitType *canUnit = CAN_GET_PRIVATE_DATA(unit);
+    const Can_HardwareObjectType *hohObj;
+    flexcan_frame_t frame;
+    uint32_t status = 0;
+    
+    memset(&frame, 0, sizeof(flexcan_frame_t));
+    status = FlEXCAN_ReadRxFifo(base, &frame);
+    // Loop over all the Hoh's
+    hohObj= canHwConfig->Can_Hoh;
+    --hohObj;
+    do {
+        ++hohObj;
+        
+        if (hohObj->CanObjectType == CAN_OBJECT_TYPE_RECEIVE)
+        {
+            Can_IdType id=frame.id;
+            
+            // According to autosar MSB shuould be set if extended
+            if (frame.id != CAN_ID_STD) {
+                id |= 0x80000000;
+            }
+            
+            CanIf_RxIndication(hohObj->CanObjectId,
+                               id,
+                               frame.length,
+                               (uint8 *)&frame.dataWord0 ); // Next layer will copy
+            
+            // Increment statistics
+            canUnit->stats.rxSuccessCnt++;
+        }
+    } while ( !hohObj->Can_EOL);
+}
+
+/**
+* ISR for CAN. MB Rx/operation
+*
+* @param unit CAN controller number( from 0 )
+*/
+static void Can_MBRxIsr(int unit) {
+    
+    CAN_HW_t *canHw= GetController(unit);
+    const Can_ControllerConfigType *canHwConfig= CAN_GET_CONTROLLER_CONFIG(Can_Global.channelMap[unit]);
+    Can_UnitType *canUnit = CAN_GET_PRIVATE_DATA(unit);
+    const Can_HardwareObjectType *hohObj;
+    flexcan_frame_t frame;
+    uint32_t status = 0;
+    memset(&frame, 0, sizeof(flexcan_frame_t));
+    status = FlEXCAN_ReadRxFifo(base, &frame);              
+    // Loop over all the Hoh's
+    hohObj= canHwConfig->Can_Hoh;
+    --hohObj;
+    do {
+        ++hohObj;
+        
+        if (hohObj->CanObjectType == CAN_OBJECT_TYPE_RECEIVE)
+        {
+            Can_IdType id=frame.id;
+            
+            // According to autosar MSB shuould be set if extended
+            if (frame.id != CAN_ID_STD) {
+                id |= 0x80000000;
+            }
+            
+            CanIf_RxIndication(hohObj->CanObjectId,
+                               id,
+                               frame.length,
+                               (uint8 *)&frame.dataWord0 ); // Next layer will copy
+            
+            // Increment statistics
+            canUnit->stats.rxSuccessCnt++;
+        }
+    } while ( !hohObj->Can_EOL);
+}
+
+void FLEXCAN_TransferHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
+{
+    /* Assertion. */
+    assert(handle);
+    
+    status_t status = kStatus_FLEXCAN_UnHandled;
+    uint32_t result;
+    
+    /* Store Current FlexCAN Module Error and Status. */
+    result = base->ESR1;
+    
+    do
+    {
+                /* Solve FlexCAN Error and Status Interrupt. */
+        if (result & (kFLEXCAN_TxWarningIntFlag | kFLEXCAN_RxWarningIntFlag | kFLEXCAN_BusOffIntFlag |
+                      kFLEXCAN_ErrorIntFlag | kFLEXCAN_WakeUpIntFlag))
+        {
+            
+            /* Solve FlexCAN Error Interrupt. */
+            if (result & kFLEXCAN_ErrorIntFlag)
+            {
+                canUnit->stats.txErrorCnt++;
+                /* Clear FlexCAN Error Interrupt. */
+            }
+             /* Solve FlexCAN Buss Off Interrupt. */
+            if (result & kFLEXCAN_BusOffIntFlag)
+            {
+                canUnit->stats.boffCnt++;
+                CanIf_ControllerBusOff(unit);
+                /* Clear FlexCAN Buss Off Interrupt. */
+            }
+            /* Solve FlexCAN Buss Off Interrupt. */
+            if (result & kFLEXCAN_WakeUpIntFlag)
+            {
+                canUnit->stats.boffCnt++;
+                Can_WakeIsr(unit);
+                /* Clear FlexCAN Buss Off Interrupt. */
+            }
+                /* Clear FlexCAN Error and Status Interrupt. */
+             FLEXCAN_ClearStatusFlags(base, kFLEXCAN_TxWarningIntFlag | kFLEXCAN_RxWarningIntFlag |
+                                                   kFLEXCAN_BusOffIntFlag | kFLEXCAN_ErrorIntFlag | 
+                                                       kFLEXCAN_WakeUpIntFlag);
+        }
+        else
+        {
+            /* For this implementation, we solve the Message with lowest MB index first. */
+            for (result = 0; result < FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base); result++)
+            {
+                /* Get the lowest unhandled Message Buffer */
+                if ((FLEXCAN_GetMbStatusFlags(base, 1 << result)) && (FLEXCAN_IsMbIntEnabled(base, result)))
+                {
+                    break;
+                }
+            }
+
+            /* Does not find Message to deal with. */
+            if (result == FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base))
+            {
+                break;
+            }
+
+        }
+        
+    }
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
+    while ((0 != FLEXCAN_GetMbStatusFlags(base, 0xFFFFFFFFFFFFFFFFU)) ||
+           (0 != (result & (kFLEXCAN_TxWarningIntFlag | kFLEXCAN_RxWarningIntFlag | kFLEXCAN_BusOffIntFlag |
+                            kFLEXCAN_ErrorIntFlag | kFLEXCAN_WakeUpIntFlag))));
+#else
+    while ((0 != FLEXCAN_GetMbStatusFlags(base, 0xFFFFFFFFU)) ||
+           (0 != (result & (kFLEXCAN_TxWarningIntFlag | kFLEXCAN_RxWarningIntFlag | kFLEXCAN_BusOffIntFlag |
+                            kFLEXCAN_ErrorIntFlag | kFLEXCAN_WakeUpIntFlag))));
+#endif
+}
+
+/* ####################### INTERNAL FUNCTIONs ########################### */
+#define INSTALL_HANDLERS(_can_name,_sce,_rx,_tx) 		/* not supported */
+
+EXPORT void Can_Hw_Init(const Can_ConfigType* Config)
+{
+	int configId;
+    NVIC_InitTypeDef NVIC_InitStructure;
+    GPIO_InitTypeDef  GPIO_InitStructure;
+	const Can_ControllerConfigType *canHwConfig;
+    
+    /* All CAN ISR use the same priority */
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    
+	for (configId=0; configId < CAN_CTRL_CONFIG_CNT; configId++)
+	{
+		canHwConfig = CAN_GET_CONTROLLER_CONFIG(configId);
+		// Note!
+		// Could install handlers depending on HW objects to trap more errors
+		// in configuration
+		switch( canHwConfig->CanControllerId ) {
+#ifndef STM32F10X_CL    //#ifdef STM32F10X_HD ifdef TC007_OBD_BT
+            case CAN_CTRL_0:
+            {
+                INSTALL_HANDLERS(Can_1, CAN1_SCE_IRQn, USB_LP_CAN1_RX0_IRQn, USB_HP_CAN1_TX_IRQn);
+                
+                /* GPIO clock enable */
+                RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO |RCC_APB2Periph_GPIOD, ENABLE);
+                /* CAN1 Periph clock enable */
+                RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
+                
+                /* Configure CAN pin: RX */
+                GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;//GPIO_Pin_CAN_RX;
+                GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+                GPIO_Init(GPIOB, &GPIO_InitStructure);
+                
+                /* Configure CAN pin: TX */
+                GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;//GPIO_Pin_CAN_TX;
+                GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+                GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+                GPIO_Init(GPIOB, &GPIO_InitStructure);
+                /* USE PB8 -->Rx  PB9 -->Tx*/
+                GPIO_PinRemapConfig(GPIO_Remap1_CAN1 , ENABLE);
+                
+                /* Enable CAN1 SCE interrupt IRQ */
+                NVIC_InitStructure.NVIC_IRQChannel = CAN1_SCE_IRQn;
+                NVIC_Init(&NVIC_InitStructure);            
+                /* Enable CAN1 RX0 interrupt IRQ channel */
+                NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
+                NVIC_Init(&NVIC_InitStructure);
+                /* Enable CAN1 TX interrupt IRQ channel */
+                NVIC_InitStructure.NVIC_IRQChannel = USB_HP_CAN1_TX_IRQn;
+                NVIC_Init(&NVIC_InitStructure);            
+                break;
+            }
+            case CAN_CTRL_1:
+            {
+                break;
+            }
+            
+#else
+            case CAN_CTRL_0:
+            {
+                INSTALL_HANDLERS(Can_1, CAN1_SCE_IRQn, CAN1_RX0_IRQn, CAN1_TX_IRQn);
+                
+                /* GPIO clock enable */
+                RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO |RCC_APB2Periph_GPIOD, ENABLE);
+                /* CAN1 Periph clock enable */
+                RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);            
+                
+                /* Configure CAN pin: RX */
+                GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;//GPIO_Pin_CAN_RX;
+                GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+                GPIO_Init(GPIOB, &GPIO_InitStructure);
+                
+                /* Configure CAN pin: TX */
+                GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;//GPIO_Pin_CAN_TX;
+                GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+                GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+                GPIO_Init(GPIOB, &GPIO_InitStructure);
+                /* USE PB8 -->Rx  PB9 -->Tx*/
+                GPIO_PinRemapConfig(GPIO_Remap1_CAN1 , ENABLE);
+                
+                /* Enable CAN1 SCE interrupt IRQ */
+                NVIC_InitStructure.NVIC_IRQChannel = CAN1_SCE_IRQn;
+                NVIC_Init(&NVIC_InitStructure);            
+                /* Enable CAN1 RX0 interrupt IRQ channel */
+                NVIC_InitStructure.NVIC_IRQChannel = CAN1_RX0_IRQn;
+                NVIC_Init(&NVIC_InitStructure);
+                /* Enable CAN1 TX interrupt IRQ channel */
+                NVIC_InitStructure.NVIC_IRQChannel = CAN1_TX_IRQn;
+                NVIC_Init(&NVIC_InitStructure);                     
+                break;
+            }
+            case CAN_CTRL_1:
+            {
+#if 0 //Do not control PB5,PB6 //ifdef TC007_OBD_BT
+                INSTALL_HANDLERS(Can_2, CAN2_SCE_IRQn, CAN2_RX0_IRQn, CAN2_TX_IRQn);
+                
+                /* GPIO clock enable */
+                RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO |RCC_APB2Periph_GPIOB, ENABLE);
+                /* CAN2 Periph clock enable */
+                RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN2, ENABLE);            
+                
+                /* Configure CAN pin: RX */
+                GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;//GPIO_Pin_CAN_RX;
+                GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+                GPIO_Init(GPIOB, &GPIO_InitStructure);
+                
+                /* Configure CAN pin: TX */
+                GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;//GPIO_Pin_CAN_TX;
+                GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+                GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+                GPIO_Init(GPIOB, &GPIO_InitStructure);
+                /* USE PB5 -->Rx  PB6 -->Tx*/
+                GPIO_PinRemapConfig(GPIO_Remap_CAN2 , ENABLE);
+                
+                /* Enable CAN2 SCE interrupt IRQ */
+                NVIC_InitStructure.NVIC_IRQChannel = CAN2_SCE_IRQn;
+                NVIC_Init(&NVIC_InitStructure);
+                /* Enable CAN2 RX0 interrupt IRQ channel */
+                NVIC_InitStructure.NVIC_IRQChannel = CAN2_RX0_IRQn;
+                NVIC_Init(&NVIC_InitStructure);
+                /* Enable CAN2 TX interrupt IRQ channel */
+                NVIC_InitStructure.NVIC_IRQChannel = CAN2_TX_IRQn;
+                NVIC_Init(&NVIC_InitStructure);
+#endif
+                break;
+            }
+#endif
+			default:
+            AR_ASSERT(0);
+		}
+	}
+	return;
+}
+
+EXPORT Std_ReturnType Can_Hw_InitController(uint8 controller,const Can_ControllerConfigType* config)
+{
+    CAN_HW_t *canHw;
+    uint8_t tq;
+    uint8_t tqSync;
+    uint8_t tq1;
+    uint8_t tq2;
+    uint32_t clock;
+    Can_UnitType *canUnit;
+    uint8 cId = controller;
+    const Can_ControllerConfigType *canHwConfig;
+    const Can_HardwareObjectType *hohObj;
+    
+    
+    canUnit = CAN_GET_PRIVATE_DATA(controller);
+    
+    canHw = GetController(cId);
+    canHwConfig = CAN_GET_CONTROLLER_CONFIG(Can_Global.channelMap[cId]);
+    
+    // Start this baby up
+    CAN_DeInit(canHw);
+    
+    /* CAN filter init. We set up two filters - one for the master (CAN1) and
+    * one for the slave (CAN2)
+    *
+    * CAN_SlaveStartBank(n) denotes which filter is the first of the slave.
+    *
+    * The filter registers reside in CAN1 and is shared to CAN2, so we only need
+    * to set up this once.
+    */
+    
+    // We let all frames in and do the filtering in software.
+    CAN_FilterInitTypeDef  CAN_FilterInitStructure;
+    CAN_FilterInitStructure.CAN_FilterMode=CAN_FilterMode_IdMask;
+    CAN_FilterInitStructure.CAN_FilterScale=CAN_FilterScale_32bit;
+    CAN_FilterInitStructure.CAN_FilterIdHigh=0x0000;
+    CAN_FilterInitStructure.CAN_FilterIdLow=0x0000;
+    CAN_FilterInitStructure.CAN_FilterMaskIdHigh=0x0000;
+    CAN_FilterInitStructure.CAN_FilterMaskIdLow=0x0000;
+    CAN_FilterInitStructure.CAN_FilterFIFOAssignment=CAN_FIFO0;
+    CAN_FilterInitStructure.CAN_FilterActivation=ENABLE;
+    
+    // Init filter 0 (CAN1/master)
+    CAN_FilterInitStructure.CAN_FilterNumber=0;
+    CAN_FilterInit(&CAN_FilterInitStructure);
+    
+    // Init filter 1 (CAN2/slave)
+    CAN_FilterInitStructure.CAN_FilterNumber=1;
+    CAN_FilterInit(&CAN_FilterInitStructure);
+    
+    // Set which filter to use for CAN2.
+    CAN_SlaveStartBank(1);
+    
+    // acceptance filters
+    hohObj = canHwConfig->Can_Hoh;
+    --hohObj;
+    do {
+        ++hohObj;
+        if (hohObj->CanObjectType == CAN_OBJECT_TYPE_RECEIVE)
+        {
+            // TODO Hw filtering
+        }
+    }while( !hohObj->Can_EOL );
+    
+    // Clock calucation
+    // -------------------------------------------------------------------
+    //
+    // * 1 TQ = Sclk period( also called SCK )
+    // * Ftq = Fcanclk / ( PRESDIV + 1 ) = Sclk
+    //   ( Fcanclk can come from crystal or from the peripheral dividers )
+    //
+    // -->
+    // TQ = 1/Ftq = (PRESDIV+1)/Fcanclk --> PRESDIV = (TQ * Fcanclk - 1 )
+    // TQ is between 8 and 25
+    clock = McuE_GetSystemClock()/2;
+    
+    tqSync = 1;
+    tq1 = config->CanControllerSeg1 + 1;
+    tq2 = config->CanControllerSeg2 + 1;
+    tq = tqSync + tq1 + tq2;
+    
+    CAN_InitTypeDef        CAN_InitStructure;
+    CAN_StructInit(&CAN_InitStructure);
+    
+    /* CAN cell init */
+    CAN_InitStructure.CAN_TTCM=DISABLE;
+    CAN_InitStructure.CAN_ABOM=ENABLE;
+    CAN_InitStructure.CAN_AWUM=ENABLE;
+    CAN_InitStructure.CAN_NART=DISABLE;
+    CAN_InitStructure.CAN_RFLM=DISABLE;
+    CAN_InitStructure.CAN_TXFP=DISABLE;
+    if(config->Can_Loopback){
+        CAN_InitStructure.CAN_Mode=CAN_Mode_LoopBack;
+    }else{
+        CAN_InitStructure.CAN_Mode=CAN_Mode_Normal;
+    }
+    
+    CAN_InitStructure.CAN_SJW=config->CanControllerPropSeg;
+    CAN_InitStructure.CAN_BS1=config->CanControllerSeg1;
+    CAN_InitStructure.CAN_BS2=config->CanControllerSeg2;
+    CAN_InitStructure.CAN_Prescaler= clock/(config->CanControllerBaudRate*1000*tq);
+    //CAN_InitStructure.CAN_Prescaler= clock/(833*100*tq);//for gmlan test
+    
+    if(CANINITOK != CAN_Init(canHw,&CAN_InitStructure))
+    {
+		return E_STD_NOT_OK;
+    }
+    
+    canUnit->state = CANIF_CS_STOPPED;
+    Can_EnableControllerInterrupts(cId);
+    
+    return E_STD_OK;
+}
+
+EXPORT Can_ReturnType Can_Hw_SetControllerMode(uint8 controller,Can_StateTransitionType transition)
+{
+    CAN_HW_t *canHw;
+    Can_ReturnType rv = CAN_OK;
+    
+    Can_UnitType *canUnit = CAN_GET_PRIVATE_DATA(controller);
+    
+    VALIDATE( (canUnit->state!=CANIF_CS_UNINIT), 0x3, CAN_E_UNINIT );
+    canHw = GetController(controller);
+    
+    switch(transition )
+    {
+        case CAN_T_START:
+	    canUnit->state = CANIF_CS_STARTED;
+        Disable_Interrupts();
+	    if (canUnit->lock_cnt == 0){   // REQ CAN196
+            Can_EnableControllerInterrupts(controller);
+	    }
+        Enable_Interrupts();
+	    break;
+        case CAN_T_WAKEUP:
+		VALIDATE(canUnit->state == CANIF_CS_SLEEP, 0x3, CAN_E_TRANSITION);
+		CAN_WakeUp(canHw);
+		canUnit->state = CANIF_CS_STOPPED;
+		break;
+        case CAN_T_SLEEP:  //CAN258, CAN290
+	    // Should be reported to DEM but DET is the next best
+	    VALIDATE(canUnit->state == CANIF_CS_STOPPED, 0x3, CAN_E_TRANSITION);
+	    CAN_Sleep(canHw);
+	    canUnit->state = CANIF_CS_SLEEP;
+		break;
+        case CAN_T_STOP:
+	    // Stop
+	    canUnit->state = CANIF_CS_STOPPED;
+	    Can_AbortTx( canHw, canUnit ); // CANIF282
+	    break;
+        default:
+	    // Should be reported to DEM but DET is the next best
+	    VALIDATE(canUnit->state == CANIF_CS_STOPPED, 0x3, CAN_E_TRANSITION);
+	    break;
+    }
+    
+    return rv;
+}
+EXPORT void Can_Hw_DisableControllerInterrupts(uint8 controller)
+{
+    Can_UnitType *canUnit;
+    CAN_HW_t *canHw;
+    
+    canUnit = CAN_GET_PRIVATE_DATA(controller);
+    
+    VALIDATE_NO_RV( (canUnit->state!=CANIF_CS_UNINIT), 0x4, CAN_E_UNINIT );
+    
+    Disable_Interrupts();
+    if(canUnit->lock_cnt > 0 )
+    {
+	    // Interrupts already disabled
+	    canUnit->lock_cnt++;
+	    Enable_Interrupts();
+	    return;
+    }
+    canUnit->lock_cnt++;
+    Enable_Interrupts();
+    
+    /* Don't try to be intelligent, turn everything off */
+    canHw = GetController(controller);
+    
+    /* Turn off the tx interrupt mailboxes */
+    CAN_ITConfig(canHw, CAN_IT_TME, DISABLE);
+    
+    /* Turn off the bus off/tx warning/rx warning and error and rx  */
+    CAN_ITConfig(canHw, CAN_IT_FMP0 | CAN_IT_BOF | CAN_IT_ERR | CAN_IT_WKU, DISABLE);
+}
+
+EXPORT void Can_Hw_EnableControllerInterrupts( uint8 controller )
+{
+    Can_UnitType *canUnit;
+    CAN_HW_t *canHw;
+    const Can_ControllerConfigType *canHwConfig;
+    
+    canUnit = CAN_GET_PRIVATE_DATA(controller);
+    
+    VALIDATE_NO_RV( (canUnit->state!=CANIF_CS_UNINIT), 0x5, CAN_E_UNINIT );
+    
+    Disable_Interrupts();
+    if( canUnit->lock_cnt > 1 )
+    {
+	    // IRQ should still be disabled so just decrement counter
+	    canUnit->lock_cnt--;
+	    Enable_Interrupts();
+	    return;
+    } else if (canUnit->lock_cnt == 1)
+    {
+	    canUnit->lock_cnt = 0;
+    }
+    Enable_Interrupts();
+    
+    canHw = GetController(controller);
+    
+    canHwConfig = CAN_GET_CONTROLLER_CONFIG(Can_Global.channelMap[controller]);
+    
+    if( canHwConfig->CanRxProcessing == CAN_PROCESS_TYPE_INTERRUPT ) {
+        /* Turn on the rx interrupt */
+	 	CAN_ITConfig(canHw, CAN_IT_FMP0, ENABLE);
+    }
+    if( canHwConfig->CanTxProcessing == CAN_PROCESS_TYPE_INTERRUPT ) {
+	 	/* Turn on the tx interrupt mailboxes */
+	   	CAN_ITConfig(canHw, CAN_IT_TME, ENABLE);
+    }
+    
+    // BusOff here represents all errors and warnings
+    if( canHwConfig->CanBusOffProcessing == CAN_PROCESS_TYPE_INTERRUPT ) {
+	 	/* Turn on the bus off/tx warning/rx warning and error and rx  */
+	 	CAN_ITConfig(canHw, CAN_IT_BOF | CAN_IT_ERR | CAN_IT_WKU, ENABLE);
+    }
+    
+    return;
+}
+
+EXPORT Can_ReturnType Can_Hw_Write( Can_HwHandleType/* Can_HTHType */ hth, const Can_PduType *pduInfo ) {
+    Can_ReturnType rv = CAN_OK;
+    CAN_HW_t *canHw;
+    const Can_HardwareObjectType *hohObj;
+    const Can_ControllerConfigType *canHwConfig;
+    uint32 controller;
+    
+    hohObj = Can_FindHoh((Can_Arc_HTHType)hth, &controller);
+    if (hohObj == NULL)
+	    return CAN_NOT_OK;
+    
+    Can_UnitType *canUnit = CAN_GET_PRIVATE_DATA(controller);
+    
+    canHw = GetController(controller);
+    Disable_Interrupts();
+    
+    CanTxMsg TxMessage;
+    
+    TxMessage.RTR=CAN_RTR_DATA;
+    TxMessage.DLC=pduInfo->length;
+    
+    memcpy(TxMessage.Data, pduInfo->sdu, pduInfo->length);
+    
+    if((pduInfo->id & 0x80000000) ==  0x80000000){//Ext ID
+		TxMessage.IDE=CAN_ID_EXT;
+		TxMessage.ExtId=pduInfo->id & 0x7FFFFFFF;
+    } else {
+		TxMessage.IDE=CAN_ID_STD;
+		TxMessage.StdId=pduInfo->id;
+    }
+    
+    // check for any free box
+    if(CAN_Transmit(canHw,&TxMessage) != CAN_NO_MB) {
+	    canHwConfig = CAN_GET_CONTROLLER_CONFIG(Can_Global.channelMap[controller]);
+        
+	    if( canHwConfig->CanTxProcessing == CAN_PROCESS_TYPE_INTERRUPT ) {
+            /* Turn on the tx interrupt mailboxes */
+	    	CAN_ITConfig(canHw,CAN_IT_TME, ENABLE);
+	    }
+        
+		// Increment statistics
+		canUnit->stats.txSuccessCnt++;
+        
+	    // Store pdu handle in unit to be used by TxConfirmation
+	    canUnit->swPduHandle = pduInfo->swPduHandle;
+    } else {
+	    rv = CAN_BUSY;
+    }
+    Enable_Interrupts();
+    
+    return rv;
+}
+
+/*Indicate Vehicle OBD interface can and already received CAN message!!
+Dont indicate network is alive!, and OBD protocol may not be ISO15765*/
+EXPORT bool Can_Hw_Is_CAN_Vehcile(void)
+{
+	if(can_network_active >=3)
+		return true;
+	else
+		return false;
+}
+
+EXPORT void Can_Hw_Network_Init(void)
+{
+	can_network_active = 0;
+	network_sleep_counter = 0;
+	//tester_conflict = 0;
+}
+
+/*Indicate network is alive!*/
+EXPORT bool Can_Hw_Is_CAN_Active(void)
+{
+	if(network_sleep_counter >=3)
+		return true;
+	else
+		return false;
+}
+
+EXPORT void Can_Hw_Clear_Network_Active(void)
+{
+	network_sleep_counter = 0;
+}
+
+/*Indicate 7DF received from other Tester!*/
+EXPORT bool Can_Hw_Is_Tester_Conflict(void)
+{
+	return (false);//(tester_conflict == 0x55); tester conflict dectection disabled for now
+}
+
+/* ######################### ISRs #############################*/
+
+#if 0
+#include <tm/tmonitor.h>
+#include <tm/tm_printf.h>
+void CanIf_TxConfirmation( PduIdType canTxPduId )
+{
+    
+}
+void CanIf_RxIndication( uint8 Hrh, Can_IdType CanId, uint8 CanDlc, const uint8 *CanSduPtr )
+{
+    tm_printf("Hrh = %d,CanId = %d:\r\n",(int)Hrh,(int)CanId);
+    while(CanDlc > 0)
+    {
+        tm_putchar(*CanSduPtr++);
+        CanDlc--;
+    } 
+    tm_putstring("\r\n");    
+}
+
+void CanIf_ControllerBusOff( uint8 Controller )
+{
+}
+
+/* ArcCore extensions */
+void CanIf_Arc_Error( uint8 Controller, Can_Arc_ErrorType Error )
+{
+}
+#endif
+

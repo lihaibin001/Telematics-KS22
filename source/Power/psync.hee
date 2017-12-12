@@ -1,0 +1,53 @@
+/**********************************************************************
+ *       Title:   PSYNC.hee
+ *
+ *  Description:  This file contains all calibration / nonvol exports for 
+ *                PSYNC .
+ *
+ *********************************************************************/
+#ifndef PSYNC_HEE_FILE
+#define  PSYNC_HEE_FILE 1
+ /*--------------------------------------------------------------------------
+ * %full_filespec:  PSYNC.hee
+ * %version:  
+ * %derived_by: 
+ * %date_modified:  
+ *---------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------
+ * Define calib and nonvol structures
+ *------------------------------------------------------------------*/
+
+typedef struct  Psync_Cust_Cal_Tag
+{
+   uint16_t  FullRun_count;           
+} Psync_Cust_Cal_T;
+
+
+/*--------------------------------------------------------------------
+ * ROM default for the radio's hardware configuration typedef
+ *------------------------------------------------------------------*/
+#define PSYNC_CUST_ROM      0x34
+
+/**********************************************************************
+ * Global Variable extern Declarations                               
+ *********************************************************************/
+extern Psync_Cust_Cal_T     * const Psync_Cust_Cal;
+/*--------------------------------------------------------------------
+ * Define Accessors to Customer Calibration Parameters 
+ *------------------------------------------------------------------*/
+#define PowerOn_Times()  (Psync_Cust_Cal->FullRun_count)//test
+
+/*********************************************************************/
+/* Constant Definitions using #define                                */
+/*********************************************************************/
+#define CUST_PSYNC_PUT_CAL(cal_ptr, size)  (vCal_Update_Block(CAL_CUST_BLOCK,Psync_Cust_Cal,cal_ptr,size))
+/*===========================================================================*\
+ * File Revision History
+ *===========================================================================
+ * ********************************************************************
+ * Date        userid    (Description on following lines: SCR #, etc.)
+ *
+ *********************************************************************/
+ #endif
+

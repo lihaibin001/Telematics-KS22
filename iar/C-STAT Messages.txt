@@ -1,0 +1,332 @@
+D:\workspace\TBOX-hengyi\firmware\code\source\board\board.c
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\board\clock_config.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+D:\workspace\TBOX-hengyi\firmware\code\source\Power\clock_mcg.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+D:\workspace\TBOX-hengyi\firmware\code\source\board\ITHandler.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+D:\workspace\TBOX-hengyi\firmware\code\source\board\rtc.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+D:\workspace\TBOX-hengyi\firmware\code\source\board\spi_flash_freertos.c
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Parameter `blkSize' is not checked against 0 before it is used as a divisor	ATH-div-0-unchk-param	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\board\spi_flash_freertos.c:391
+    spi_flash_erase_block	D:\workspace\TBOX-hengyi\firmware\code\source\board\spi_flash_freertos.c
+      if (offset%blkSize) is false	D:\workspace\TBOX-hengyi\firmware\code\source\board\spi_flash_freertos.c:391
+      non_float_cast_divide	D:\workspace\TBOX-hengyi\firmware\code\source\board\spi_flash_freertos.c:391
+      switch (blkSize)	D:\workspace\TBOX-hengyi\firmware\code\source\board\spi_flash_freertos.c:397
+      case 32768:	D:\workspace\TBOX-hengyi\firmware\code\source\board\spi_flash_freertos.c:399
+      break	D:\workspace\TBOX-hengyi\firmware\code\source\board\spi_flash_freertos.c:401
+      if (ret) is true	D:\workspace\TBOX-hengyi\firmware\code\source\board\spi_flash_freertos.c:413
+      return	D:\workspace\TBOX-hengyi\firmware\code\source\board\spi_flash_freertos.c:416
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\board\uart.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Expression `(unsigned_short)(tmp_uartx->D&(unsigned_short)0x1ff)' with range [0,511] may overflow to [0,255] when implicitly converted to unsigned 8-bit int	ATH-overflow	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\board\uart.c:317
+  Expression `(unsigned_short)(tmp_uartx->D&(unsigned_short)0x1ff)' with range [0,511] may overflow to [0,255] when implicitly converted to unsigned 8-bit int	ATH-overflow	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\board\uart.c:381
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\board\wdog.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+D:\workspace\TBOX-hengyi\firmware\code\source\Can\sysdepend\KS22\Can_Hw.c
+  Dynamic memory `malloc(sizeof()*filterCnt)' is not freed, returned or passed as an argument on all paths, causing a possible memory leak	MEM-leak-alias	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Can\sysdepend\KS22\Can_Hw.c:220
+    CAN_ReceiveFIFOConfig	D:\workspace\TBOX-hengyi\firmware\code\source\Can\sysdepend\KS22\Can_Hw.c
+      if (chan<) is true	D:\workspace\TBOX-hengyi\firmware\code\source\Can\sysdepend\KS22\Can_Hw.c:217
+      MEM-leak-alias	D:\workspace\TBOX-hengyi\firmware\code\source\Can\sysdepend\KS22\Can_Hw.c:220
+      if (rxFifoFilter==_NULL) is false	D:\workspace\TBOX-hengyi\firmware\code\source\Can\sysdepend\KS22\Can_Hw.c:221
+      for (filterIDX = 0;filterIDX<filterCnt;filterIDX++) is false	D:\workspace\TBOX-hengyi\firmware\code\source\Can\sysdepend\KS22\Can_Hw.c:225
+      switch (chan)	D:\workspace\TBOX-hengyi\firmware\code\source\Can\sysdepend\KS22\Can_Hw.c:235
+      default:	D:\workspace\TBOX-hengyi\firmware\code\source\Can\sysdepend\KS22\Can_Hw.c:243
+      return	D:\workspace\TBOX-hengyi\firmware\code\source\Can\sysdepend\KS22\Can_Hw.c:244
+      End of function 	D:\workspace\TBOX-hengyi\firmware\code\source\Can\sysdepend\KS22\Can_Hw.c:256
+  The operand of `sizeof()' does not match the type of the target of the allocation call `malloc(sizeof()*filterCnt)'	MEM-malloc-diff-type	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Can\sysdepend\KS22\Can_Hw.c:220
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\Can\Can.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\common\crc_ccitt.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\common\diag_task.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\common\gensubs.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Local variable `old_range' is not checked against 0 before it is used as a divisor	ATH-div-0-unchk-local	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\common\gensubs.c:705
+    Scale	D:\workspace\TBOX-hengyi\firmware\code\source\common\gensubs.c
+      non_float_cast_divide	D:\workspace\TBOX-hengyi\firmware\code\source\common\gensubs.c:705
+      return	D:\workspace\TBOX-hengyi\firmware\code\source\common\gensubs.c:704
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\common\param.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  `sFLASH_WriteBuffer' does not have a valid prototype, calls bypass all type checking	FUNC-unprototyped-used	Low	D:\workspace\TBOX-hengyi\firmware\code\source\common\param.c:859
+  Expression `total_bytes>>8' with range [0,1024] may overflow to [0,255] when implicitly converted to unsigned 8-bit int	ATH-overflow	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\common\param.c:920
+  Expression `total_bytes>>0' with range [0,262144] may overflow to [0,255] when implicitly converted to unsigned 8-bit int	ATH-overflow	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\common\param.c:921
+  Variable `crc' is unused on all paths	RED-unused-var-all	Low	D:\workspace\TBOX-hengyi\firmware\code\source\common\param.c:951
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\common\periodic.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Value assigned to variable `gps_gsm_status' is never used	RED-unused-assign	Low	D:\workspace\TBOX-hengyi\firmware\code\source\common\periodic.c:361
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\common\record_task.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  `Switch_GPS_Sturcture_data_to_log' does not have a valid prototype, calls bypass all type checking	FUNC-unprototyped-used	Low	D:\workspace\TBOX-hengyi\firmware\code\source\common\record_task.c:136
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\common\ring_buf.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\common\rtos.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  `xTaskIsTaskSuspended' does not have a valid prototype, calls bypass all type checking	FUNC-unprototyped-used	Low	D:\workspace\TBOX-hengyi\firmware\code\source\common\rtos.c:182
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\common\str_lib.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\common\timer.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\CanIf\CanIf.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\Config\Can_Lcfg.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\Config\CanIf_Cfg.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\Config\Com_PbCfg.c
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\Config\PduR_PbCfg.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR.c
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_CanIf.c
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_CanTp.c
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Com.c
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Dcm.c
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_J1939Tp.c
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_LinIf.c
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Logic.c
+  Variable `i' is unsigned and checked to be positive	ATH-cmp-unsign-pos	Low	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Logic.c:45
+  Variable `i' is unsigned and checked to be positive	ATH-cmp-unsign-pos	Low	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Logic.c:60
+  Variable `PduId' is unsigned and checked to be positive	ATH-cmp-unsign-pos	Low	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Logic.c:97
+  Pointer `route' is compared with NULL, then dereferenced	PTR-null-cmp-bef	High	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Logic.c:265
+    PduR_ARC_RxIndication	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Logic.c
+      A possible assignment to variable `route'	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Logic.c:253
+      if (route!=NULL && !(((route->SrcModule>) && (route->SrcModule<)) || ((route->SrcModule>) && (route->SrcModule<)))) is false	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Logic.c:256
+      if ((PduId<PDUR_N_TP_ROUTES_WITH_BUFFER && (PduRConfig->TpRouteBuffers[PduId])!=NULL && (PduRConfig->TpRouteBuffers[PduId])->status==)) is false	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Logic.c:260
+      for (;route->PduRDestPdus[i]!=NULL;i++)	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Logic.c:265
+      Dereference of pointer `route'	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Logic.c:265
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Routing.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Variable `retVal' may be uninitialized	SPC-uninit-var-some	High	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Routing.c:164
+    PduR_ARC_RouteProvideRxBuffer	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Routing.c
+      switch (destination->DestModule)	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Routing.c:153
+      case 2:	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Routing.c:154
+      break	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Routing.c:158
+      Read of `retVal'	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Routing.c:164
+  Variable `retVal' may be uninitialized	SPC-uninit-var-some	High	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Routing.c:180
+    PduR_ARC_RouteProvideTxBuffer	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Routing.c
+      switch (route->SrcModule)	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Routing.c:169
+      case 2:	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Routing.c:170
+      break	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Routing.c:174
+      Read of `retVal'	D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_Routing.c:180
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\ComStack\PduR\PduR_SoAd.c
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATApp.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  Parameter `retry_perid' is not checked against 0 before it is used as a divisor	ATH-div-0-unchk-param	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATApp.c:96
+    vATApp_Retry_Inc	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATApp.c
+      if (send_retries>5*retry_perid) is false	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATApp.c:88
+      if (0==send_retries%retry_perid) is false	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATApp.c:96
+      non_float_cast_divide	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATApp.c:96
+      return	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATApp.c:102
+  Parameter `retry_perid' is not checked against 0 before it is used as a divisor	ATH-div-0-unchk-param	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATApp.c:113
+    vATApp_Retry_Check	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATApp.c
+      non_float_cast_divide	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATApp.c:113
+      return	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATApp.c:113
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATProtocol.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  variable `tcp_rx_comma_pos' clashes with global variable `tcp_rx_comma_pos' (at line ATProtocol.c:317)	RED-local-hides-global	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATProtocol.c:1386
+  Array `tcp_state' 1st subscript interval [0,2] may be out of bounds [0,1]	ARR-inv-index-pos	High	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATProtocol.c:2373
+  Array `tcp_state' 1st subscript interval [0,2] may be out of bounds [0,1]	ARR-inv-index-pos	High	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\ATProtocol.c:2383
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\GPRS.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmApp.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  variable `newReq' clashes with global variable `newReq' (at line TelmApp.c:617)	RED-local-hides-global	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmApp.c:666
+  Overrun in strncmp with string `gps_info.longitude'. Length passed to strncmp is 7, but string is of length 460	LIB-strncmp-overrun	High	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmApp.c:833
+    gps_write_nv	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmApp.c
+      if (gps_backup==0) is false	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmApp.c:829
+      if ((0==strncmp((signed_char *)gps_info.longitude, (signed_char *)gps_last_pos[0], VEHICLE_STOP_GPS_CMP_LEN)) && (0==strncmp((signed_char *)gps_info.latitude, (signed_char *)gps_last_pos[1], VEHICLE_STOP_GPS_CMP_LEN)))	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmApp.c:833
+      LIB-strncmp-overrun	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmApp.c:833
+  Overrun in strncmp with string `gps_info.latitude'. Length passed to strncmp is 7, but string is of length 460	LIB-strncmp-overrun	High	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmApp.c:834
+    gps_write_nv	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmApp.c
+      if (gps_backup==0) is false	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmApp.c:829
+      if ((0==strncmp((signed_char *)gps_info.longitude, (signed_char *)gps_last_pos[0], VEHICLE_STOP_GPS_CMP_LEN)) && (0==strncmp((signed_char *)gps_info.latitude, (signed_char *)gps_last_pos[1], VEHICLE_STOP_GPS_CMP_LEN)))	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmApp.c:833
+      LIB-strncmp-overrun	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmApp.c:834
+  `sFLASH_EraseSector' does not have a valid prototype, calls bypass all type checking	FUNC-unprototyped-used	Low	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmApp.c:920
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmProtocol.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  variable `dataLen' clashes with global variable `dataLen' (at line TelmProtocol.c:305)	RED-local-hides-global	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmProtocol.c:400
+  Value assigned to variable `data' is never used	RED-unused-assign	Low	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmProtocol.c:416
+  Value assigned to variable `len' is never used	RED-unused-assign	Low	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmProtocol.c:417
+  Variable `i' is unused on all paths	RED-unused-var-all	Low	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmProtocol.c:941
+  Variable `encdataLen' is unused on all paths	RED-unused-var-all	Low	D:\workspace\TBOX-hengyi\firmware\code\source\GPRS\TelmProtocol.c:942
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Variable `pack_num' may be uninitialized	SPC-uninit-var-some	High	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1186
+    NMEA_GPGSV_Msg_Decode	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c
+      if ((len>0) && (len<=2)) is false	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1136
+      if ((len>0) && (len<=2)) is false	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1152
+      if (len==2) is true	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1168
+      if (gps_data.gps_sat_info.viewed_sat_num>12) is true	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1171
+      for (cur_sat_num = 0;cur_sat_num<4;cur_sat_num++) is true	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1184
+      if ((cur_sat_num+4*(pack_num-1))>=gps_data.gps_sat_info.viewed_sat_num)	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1186
+      Read of `pack_num'	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1186
+  Variable `pack_num' may be uninitialized	SPC-uninit-var-some	High	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1307
+    BD_BDGSV_Msg_Decode	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c
+      if ((len>0) && (len<=2)) is false	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1257
+      if ((len>0) && (len<=2)) is false	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1273
+      if (len==2) is false	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1289
+      for (cur_sat_num = 0;cur_sat_num<4;cur_sat_num++) is true	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1305
+      if ((cur_sat_num+4*(pack_num-1))>=gps_data.bd_sat_info.viewed_sat_num)	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1307
+      Read of `pack_num'	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1307
+  Value assigned to variable `p' is never used	RED-unused-assign	Low	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1364
+  Value assigned to variable `p' is never used	RED-unused-assign	Low	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1395
+  Expression `(point_ptr-2)' with range [-1,12] may overflow to [0,255] when implicitly converted to unsigned 8-bit int	ATH-overflow	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1520
+  Expression `point_ptr-2' with range [-1,12] may overflow to [0,255] when implicitly converted to unsigned 8-bit int	ATH-overflow	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1555
+  Value assigned to variable `decimal_base' is never used	RED-unused-assign	Low	D:\workspace\TBOX-hengyi\firmware\code\source\GPS\gps.c:1638
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm.c
+  Pointer `trans_ptr' is compared with NULL, then dereferenced	PTR-null-cmp-bef	High	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm.c:136
+    FSM_Process_Evt	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm.c
+      if (tree_ptr==_NULL) is false	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm.c:111
+      A possible assignment to variable `trans_ptr'	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm.c:118
+      if ((trans_ptr!=_NULL) && (trans_ptr[length-1].event==EXIT)) is false	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm.c:122
+      while (i<length) is true	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm.c:134
+      if (trans_ptr->event==msg.parts.msg)	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm.c:136
+      Dereference of pointer `trans_ptr'	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm.c:136
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\Power\lowpower.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+D:\workspace\TBOX-hengyi\firmware\code\source\Power\power_mode_switch.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\Power\powerfail.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\Power\Psync.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Dead code found	RED-dead	Low	D:\workspace\TBOX-hengyi\firmware\code\source\Power\Psync.c:499
+  Dead code found	RED-dead	Low	D:\workspace\TBOX-hengyi\firmware\code\source\Power\Psync.c:514
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_tree.h:38
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\Power\relays.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Dead code found	RED-dead	Low	D:\workspace\TBOX-hengyi\firmware\code\source\Power\relays.c:771
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\SysMan\system.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\user\main.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
+D:\workspace\TBOX-hengyi\firmware\code\source\user\vehicle.c
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:628
+  RHS argument is in interval [0,65535] which is out of range of the shift operator	ATH-shift-bounds	Medium	D:\workspace\TBOX-hengyi\firmware\code\devices\MKS22F12\drivers\fsl_clock.h:639
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\Power\fsm_stat.h:42
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\Std_Types.h:65
+  Multiple # or ## operators used, order of evaluation is unspecified	DEFINE-hash-multiple	Medium	D:\workspace\TBOX-hengyi\firmware\code\source\include\definiti.h:29
