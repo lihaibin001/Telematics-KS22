@@ -1508,8 +1508,26 @@ static void ipTransmitter(void)
 	}
 	if(linkDetecter[data.channel].heartbeat >= MAX_HEARTBEAT_CNT)
 	{
-		//check current sesion state
+		//check current session state
 		ModuleCloseSesion(data.channel);
+	}
+	if(netSesionTbl[data.channel].state == ipSesionInactive)
+	{
+		if(xQueueReceive(TxDataQueue, &data, pdMS_TO_TICKS(100)) != pdPASS)
+		{
+			DEBUG(DEBUG_HIGH, "[IOT] Delete TxDataQueue item error\r\n");
+		}
+		else
+		{
+				if(data.pData)
+				{
+					vPortFree(data.pData);
+					data.pData = NULL;
+				}
+
+		}
+		return ;
+
 	}
 	if(netSesionTbl[data.channel].state == ipSesionOpened)
 	{
@@ -1939,7 +1957,7 @@ bool IOT_IpNetSend(uint8_t channel, uint8_t *pData, uint16_t len, ipSendCb cb)
 {
 	if(channel >= netSesionNum || pData == NULL || len == 0)
 	{
-		DEBUG(DEBUG_HIGH, "[IOT] ERROR: param error,\r\n");
+		DEBUG(DEBUG_HIGH, "[IOT] ERROR: parameter error,\r\n");
 		return  false;
 	}
 	if(IOT_GetSessionState(channel) == ipSesionOpened && !localFlag.powerDownReq)
@@ -2009,7 +2027,7 @@ static void modulePowerDownPreHandle(void)
 
 		vTaskDelay(pdMS_TO_TICKS(100));
 	}while(xTaskGetTickCount() < timeOut);
-	//check all sesion state, if any sesion is connected close it
+	//check all session state, if any sesion is connected close it
 	for(sesionNum=0; sesionNum<netSesionNum; sesionNum++)
 	{
 		if(netSesionTbl[sesionNum].state == ipSesionOpened)

@@ -130,6 +130,7 @@ static void prvRecord_evt_nop(int16_t data);
 static void prvRecord_evt_rltmTalRefresh(int16_t data);
 static void prvRecord_evt_Level3Alarm(int16_t data);
 static void prvRecord_evt_CleanRecord(int16_t data);
+static void prvRecord_evt_disConGb(int16_t data);
 /*********************************************************************/
 /* Static Variables and Const Variables With File Level Scope        */
 /*********************************************************************/
@@ -139,6 +140,7 @@ static void_int16_fptr record_event_handler[]=
     prvRecord_evt_rltmTalRefresh,       //RECORD_EVT_RLTM_DATA_REFRESH
     prvRecord_evt_Level3Alarm,          //RECORD_EVT_WARNING_LEVEL_3
     prvRecord_evt_CleanRecord,
+	prvRecord_evt_disConGb,
 };
 /*********************************************************************/
 /* User file include                                                 */
@@ -263,7 +265,7 @@ static void logStateDetetor(void)
     {
         loginTimes = 0;
     }
-    //checke GB platform
+    //check GB platform
     if(gbLogTimeout == 0xFF)
     {
         if(gbLogTimeout <= xTaskGetTickCount())
@@ -610,6 +612,23 @@ static void prvRecord_evt_CleanRecord(int16_t data)
     Init_vhcl_Info();
 }
 
+static void disConnetOk(bool isOk, uint8_t chanel)
+{
+	IOT_IpClose((uint8_t)TELM_GB_SESION);
+	TelmProt_setSesionState(TELM_GB_SESION, TELM_SESION_INACTIVE);
+}
+
+static void prvRecord_evt_disConGb(int16_t data)
+{
+	uint8_t *pSendBuff = pvPortMalloc(128);
+	uint16_t len = 0;
+	if(pSendBuff)
+	{
+		len = TelmProt_Encode(pSendBuff, TELM_LOGOUT, MSG_ENCRYPT_NONE, 128);
+		IOT_IpNetSend(TELM_GB_SESION, pSendBuff, len, disConnetOk );
+		TelmProt_setSesionState(TELM_GB_SESION, TELM_SESION_LOGOUTING);
+	}
+}
 
 /*=====================================================================*\
  * File Revision History

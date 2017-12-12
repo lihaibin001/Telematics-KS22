@@ -210,8 +210,12 @@ static bool prvTelmProt_ParseControlCmd(uint8_t *pData, uint16_t dataLen)
             OS_Send_Message(OS_RECORD_TASK, Build_Message(RECORD_EVT_CLEAN_RECORD, 0));
             respHandler = prvTelmProt_ChangeKey;
             return true;
-        case 0x8E: //open spamle link
+        case 0x07: //open sample link
             return IOT_IpOpenUnblock((uint8_t)TELM_GB_SESION);
+        case 0x8E: //close sample link
+        	//return IOT_IpClose((uint8_t)TELM_GB_SESION);
+        	 OS_Send_Message(OS_RECORD_TASK, Build_Message(RECORD_EVT_CLOSE_GB, 0));
+        	 return true;
         default:
             break;
     }
@@ -246,10 +250,12 @@ extern void vTelmProt_ParseIpData(uint8_t *pData, uint16_t len, uint8_t sesionNu
 
     bodyLen = (pHeader->len[0] << 8) + pHeader->len[1];  
     prvTelmProt_Encode_Chk(&chk_tmp, pData+2, len-3);
+#if 0
     if ((chk_tmp != *(pData + len - 1)))
     {
         return ;
     }
+#endif
     
     if(pHeader->ackFalg == 0x01) //positive resp from server
     {
@@ -352,7 +358,7 @@ extern void vTelmProt_ParseIpData(uint8_t *pData, uint16_t len, uint8_t sesionNu
         //response
         if(isDataRight)
         {
-            //encode reponse
+            //encode response
             pHeader->ackFalg = 0x01;
             pHeader->len[0] = 0;
             pHeader->len[1] = 7;
@@ -362,6 +368,11 @@ extern void vTelmProt_ParseIpData(uint8_t *pData, uint16_t len, uint8_t sesionNu
             prvTelmProt_Encode_Chk(&pData[sizeof(Telm_data_header_t) + bodyLen], pData+2, sizeof(Telm_data_header_t) + bodyLen -2);
             IOT_IpNetSend(sesionNum, pData, sizeof(Telm_data_header_t)+bodyLen+1,respHandler);
             respHandler = NULL;
+        }
+        if(pDataTmp)
+        {
+        	vPortFree(pDataTmp);
+        	pDataTmp = NULL;
         }
     }
 }
@@ -680,6 +691,8 @@ uint16_t TelmProt_Encode(uint8_t *pBuffer,
     uint8_t infoIndex;
     if(encodeLock)
     {
+    	vPortFree(tmp_data);
+    	tmp_data = NULL;
         return 0;
     }
     if(tmp_data == NULL)

@@ -98,6 +98,9 @@
 #define UDS_SECURITY_GURAD_OK       (uint8_t)0x0A
 #define UDS_SECURITY_VENDER         (uint8_t)0x61
 #define UDS_SECURITY_VENDER_OK      (uint8_t)0x62
+/* UDS security access level */
+#define UDS_SECUR_LEL_1				(uint8_t)0x01
+#define UDS_SECUR_LEL_FBL			(uint8_t)0x09
 
 #define UDS_FIRSR_FRAME_MAX_LEN     (uint8_t)6
 

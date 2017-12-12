@@ -20,6 +20,7 @@ typedef enum record_event_tag
     RECORD_EVT_RLTM_DATA_REFRESH,
     RECORD_EVT_ALARM,
     RECORD_EVT_CLEAN_RECORD,
+	RECORD_EVT_CLOSE_GB,
     RECORD_NUM_EVENTS
 }record_event_t;
 typedef struct
