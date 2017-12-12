@@ -689,18 +689,18 @@ uint16_t TelmProt_Encode(uint8_t *pBuffer,
     uint8_t *pData = &pBuffer[headLen];
     uint8_t *tmp_data = pvPortMalloc(bufferSzie);
     uint8_t infoIndex;
+    if(tmp_data == NULL)
+    {
+        DEBUG(DEBUG_HIGH, "[TP] Malloc error. Line:%d\r\n",__LINE__);
+        return 0;
+    }
     if(encodeLock)
     {
     	vPortFree(tmp_data);
     	tmp_data = NULL;
         return 0;
     }
-    if(tmp_data == NULL)
-    {
-        DEBUG(DEBUG_HIGH, "[TP] Malloc error. Line:%d\r\n",__LINE__);
-        return 0;
-    }
-    /* encode each type of infomation according to protocol */
+    /* encode each type of information according to protocol */
     for (infoIndex = 0; infoIndex < TELM_INFO_IN_PACK_MAX_NUM; infoIndex++)
     {
         uint8_t encode_index = uploadDataTable[dataType][infoIndex];
