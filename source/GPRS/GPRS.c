@@ -39,7 +39,7 @@ typedef enum
 	ret_fatal_err,
 }FnRet_t;
 
-/* functoin pointor definetion */
+/* function pointer declaration*/
 typedef FnRet_t (*fpCmdHandler)(uint8_t *pData); 
 typedef FnRet_t (*fpEventFnx)(void *pParm);
 
@@ -125,7 +125,7 @@ typedef struct
 	uint8_t *type;
 	uint16_t port;
 	netSesionState_t state;
-	//    bool isActive;
+	bool isActive;
 }netSessionInfo_t;
 
 /* express the module state */
@@ -153,6 +153,7 @@ typedef struct
 	uint16_t len;
 	uint32_t timeOut;
 	uint16_t tryCnt;
+	uint8_t cmdType;
 }atCmd_tbl_t;
 
 /* send data buffer */
@@ -227,15 +228,15 @@ static  netSessionInfo_t netSesionTbl[] =
 		.pHost = "59.44.43.234",
 		.port = 30032,
 		.type = (uint8_t *)"TCP",
-		.state = ipSesionInactive,
-		//        .isActive = true
+		.state = ipSesionClose,
+        .isActive = true
 	},
 	{
 		.pHost = "101.37.87.65",
 		.port = 30032,
 		.type = (uint8_t *)"TCP",
-		.state = ipSesionInactive,
-		//        .isActive = false
+		.state = ipSesionClose,
+        .isActive = false
 	}
 };
 static moduleInfo_t moduleInfo;
@@ -252,9 +253,9 @@ static QueueHandle_t TxDataQueue;
 static QueueHandle_t RxDataQueue[sizeof(netSesionTbl) / sizeof(netSessionInfo_t)];
 //static TickType_t ipDataSendTimer[sizeof(netSesionTbl) / sizeof(netSessionInfo_t)];
 static TickType_t ipTransTimer;
-//uncomment this if use SMS
+//SMS buffer
 //static QueueHandle_t MesageQueue;
-//uncomment this if use Ftp
+//FTP buffer
 //static QueueHandle_t RxFtpQueue;
 
 static TickType_t cmdExecuteTime;
@@ -288,7 +289,7 @@ struct _flag_strut
 	uint8_t isEcho : 1;
 	uint8_t isSimReady : 1;
 	uint8_t isIpTransOk : 1;
-//	uint8_t ipCloseReq : 1;
+//	uint8_t ipSesionKillReq : 1;
 	uint8_t cmdState : 1; 
 	uint8_t lastCsq : 5;
 };
@@ -638,7 +639,7 @@ static void ModuleIpOpen(uint8_t channel)
     *event.pData = channel;
 	if(event.pData == NULL)
 	{
-		DEBUG(DEBUG_HIGH, "[IOT] ERROR: Malloc error. Line:%d!\r\n", __LINE__);
+		DEBUG(DEBUG_HIGH, "[IOT] ERROR: Allocate memory error. Line:%d!\r\n", __LINE__);
 		return ;
 	}
 	memcpy(event.pData, &channel, sizeof(uint8_t));
@@ -648,7 +649,7 @@ static void ModuleIpOpen(uint8_t channel)
 		return ;
 	}
 	linkDetecter[channel].reconnectCnt++;
-//	netSesionTbl[channel].state = ipSesionOpening;
+	netSesionTbl[channel].state = ipSesionOpening;
 }
 
 static void ModuleSelfTeste(void)
@@ -684,7 +685,7 @@ static void ModuleCloseSesion(uint8_t channel)
 		DEBUG(DEBUG_HIGH, "[IOT] ERROR: Add GprsTestEvt event failed!\r\n");
 		return ;
 	}	
-	//netSesionTbl[channel].state = ipSesionClosing;  
+	netSesionTbl[channel].state = ipSesionClosing;
 }
 
 static void ModuleCsqCheck(TimerHandle_t xTimer)
@@ -735,13 +736,13 @@ static void ModuleDeactive(void)
 /*****************************************************************************/
 
 
-//Recover records sesion after restart module
+//Recover records session after restart module
 static void ModuleRecoverSesion(void)
 {
 	uint8_t sesionIdx;
 	for(sesionIdx=0; sesionIdx<netSesionNum; sesionIdx++)
 	{
-		if(netSesionTbl[sesionIdx].state != ipSesionInactive)
+		if(netSesionTbl[sesionIdx].isActive)
 		{
 			ModuleIpOpen(sesionIdx);
 		}
@@ -787,12 +788,60 @@ static void cmdSender(void)
 		//send command
 		if(localFlag.cmdState == 0)
 		{
+			//if command is IP send command
+			if(!memcmp(command.pCommand, "AT+CIPSEND=", strlen("AT+CIPSEND=")))
+			{
+				if(localFlag.isMulti)
+				{
+					uint8_t channel = command.pCommand[strlen("AT+CIPSEND=")] - '0';
+					if(channel < netSesionNum)
+					{
+						if( netSesionTbl[channel].state != ipSesionOpened)
+						{
+							TxData_t data;
+							xQueueReceive(TxDataQueue, &data, pdMS_TO_TICKS(100));
+							if(data.channel != channel)
+							{
+								DEBUG(DEBUG_HIGH, "[IOT] TxQueue ERROR\r\n")
+							}
+							if(data.cb)
+							{
+								data.cb(false, channel);
+							}
+							if(data.pData)
+							{
+								vPortFree(data.pData);
+								data.pData = NULL;
+							}
+							if(pdPASS == xQueueReceive(AtCmdQueue,&command, 0))
+							{
+								if(command.pCommand)
+								{
+									vPortFree(command.pCommand);
+									command.pCommand = NULL;
+								}
+							}
+							else
+							{
+								DEBUG(DEBUG_HIGH, "[IOT] error when delete the at queue item\r\n");
+							}
+							return;
+						}
+
+					}
+					else
+					{
+						//should not entry here
+					}
+				}
+
+			}
 			if(ret_sucess != portSend(command.pCommand, command.len))
 			{
 				DEBUG(DEBUG_HIGH, "[IOT] ERROR: Port send data failed\r\n");
 				return ;
 			}
-			DEBUG(DEBUG_LOW,"[IOT] send cmd: %s\r\n",command.pCommand);
+			DEBUG(DEBUG_LOW,"[IOT] send CMD: %s\r\n",command.pCommand);
 			cmdTryCnt = 1;
 			cmdExecuteTime = pdMS_TO_TICKS(command.timeOut) + xTaskGetTickCount();
 			localFlag.cmdState = 1;
@@ -801,7 +850,7 @@ static void cmdSender(void)
 	return ;	
 }
 
-/* detect the urc */
+/* detect the URC */
 static UrcCdoe_t urcDetecter(uint8_t *pData)
 {
 	UrcCdoe_t idx = UrcNotReady;
@@ -967,7 +1016,7 @@ static FnRet_t cgattRespDecoder(uint8_t *pResp)
 	return ret_fail;
 }
 
-/* Decode local ip address */
+/* Decode local IP address */
 static FnRet_t cifsrRespDecoder(uint8_t *pResp)
 {
     if(pResp == NULL)
@@ -987,7 +1036,7 @@ static FnRet_t cifsrRespDecoder(uint8_t *pResp)
 	return ret_fail;
 }
 
-/* Deocde ip send command. wait for '>' */
+/* Decode IP send command. wait for '>' */
 static FnRet_t ipSendRespDecoder(uint8_t *pData)
 {
 	FnRet_t ret = ret_fail;
@@ -1027,7 +1076,7 @@ static FnRet_t ipSendRespDecoder(uint8_t *pData)
 					}
                     if(dataLen != Data.dataLen)
                     {
-                        DEBUG(DEBUG_HIGH, "[IOT] ERROR: data len error\r\n");
+                        DEBUG(DEBUG_HIGH, "[IOT] ERROR: data length error\r\n");
                     }
 					else
 					{
@@ -1073,7 +1122,7 @@ static FnRet_t csqCheckDecoder(uint8_t *pData)
 
 static FnRet_t waitCloseOk(uint8_t *pData)
 {
-    atCmd_tbl_t command;
+    //atCmd_tbl_t command;
     uint8_t channel = 0;
     if(pData == NULL)
     {
@@ -1084,12 +1133,11 @@ static FnRet_t waitCloseOk(uint8_t *pData)
 		channel = pData[0] - '0';
 		if(!memcmp(pData+3, "CLOSE OK", strlen("CLOSE OK")))
 		{
-			netSesionTbl[channel].state = ipSesionInactive;
-			cleanAtCmdQueue();
+			netSesionTbl[channel].state = ipSesionClose;
+			//cleanAtCmdQueue();
 			return ret_sucess;
 		}
 	}
-
     return ret_fail;
 }
 #if 0
@@ -1393,7 +1441,7 @@ static FnRet_t test(void)
 
 static FnRet_t deactiveGprs(void)
 {
-	if(cmdSend("at+cipshut\r\n", strlen("at+cipshut\r\n"), 500, 1, commonRespDecoder))
+	if(cmdSend("AT+CIPSHUT\r\n", strlen("AT+CIPSHUT\r\n"), 500, 1, commonRespDecoder))
 	{
 		return ret_fail;
 	}
@@ -1404,12 +1452,12 @@ static FnRet_t closeSesion(uint8_t sesion)
 {
 	if(sesion >= netSesionNum)
 	{
-		DEBUG(DEBUG_HIGH, "[IOT] close sesion num error\r\n");
+		DEBUG(DEBUG_HIGH, "[IOT] close session number error\r\n");
 		return ret_fail;
 	}
 	if(localFlag.isMulti == 0)
 	{
-		if(cmdSend("at+cipclose=1\r\n", strlen("at+cipclose=1\r\n"), 500, 1, waitCloseOk))
+		if(cmdSend("AT+CIPCLOSE=1\r\n", strlen("AT+CIPCLOSE=1\r\n"), 500, 1, waitCloseOk))
 		{
 			DEBUG(DEBUG_HIGH, "[IOT] closeSesion add At com error\r\n");
 			return ret_fail;
@@ -1418,10 +1466,10 @@ static FnRet_t closeSesion(uint8_t sesion)
 	else
 	{
 		uint8_t cmd[64] = "";
-		sprintf((char *)cmd, "at+cipclose=%d,1\r\n", sesion);
+		sprintf((char *)cmd, "AT+CIPCLOSE=%d,1\r\n", sesion);
 		if(cmdSend(cmd, strlen((char *)cmd), 1000, 1, waitCloseOk))
 		{
-			DEBUG(DEBUG_HIGH, "[IOT] closeSesion add At com error\r\n");
+			DEBUG(DEBUG_HIGH, "[IOT] closeSesion add At command error\r\n");
 			return ret_fail;
 		}
 	}
@@ -1510,8 +1558,9 @@ static void ipTransmitter(void)
 	{
 		//check current session state
 		ModuleCloseSesion(data.channel);
+		return ;
 	}
-	if(netSesionTbl[data.channel].state == ipSesionInactive)
+	if(!netSesionTbl[data.channel].isActive)
 	{
 		if(xQueueReceive(TxDataQueue, &data, pdMS_TO_TICKS(100)) != pdPASS)
 		{
@@ -1524,14 +1573,17 @@ static void ipTransmitter(void)
 					vPortFree(data.pData);
 					data.pData = NULL;
 				}
-
+				if(data.cb)
+				{
+					data.cb(false, data.channel);
+				}
 		}
 		return ;
 
 	}
 	if(netSesionTbl[data.channel].state == ipSesionOpened)
 	{
-		if(cmdSend(cmd, strlen((char *)cmd) ,IP_SEND_TIMEOUT-10, 1, ipSendRespDecoder) != ret_sucess)
+		if(cmdSend(cmd, strlen((char *)cmd) ,IP_SEND_TIMEOUT, 1, ipSendRespDecoder) != ret_sucess)
 		{ 
 			DEBUG(DEBUG_HIGH,"[IOT] Error: When send data!\r\n");
 			return ;
@@ -1649,7 +1701,7 @@ static FnRet_t UrcFatalHandler(uint8_t *pData)
         if(moduleState == StateAttached) //??????????????
         {
             uint8_t idx;
-            //close all sesion
+            //close all session
             for(idx=0; idx<netSesionNum; idx++)
             {
                 if(netSesionTbl[idx].state == ipSesionOpened)
@@ -1726,39 +1778,35 @@ static FnRet_t UrcDisConnectedHandler(uint8_t *pData)
 		}
 	}
 	//cleanTxDataQueue();
-    if(localFlag.powerDownReq == 1 || netSesionTbl[sesionNum].state == ipSesionClosing)
-    {
-        netSesionTbl[sesionNum].state = ipSesionInactive;
-    }
-	else
-    { 
-		//reconnect
-		if(moduleState == StateAttached)
+
+	//reconnect
+	if(moduleState != StateRecover)
+	{
+		if(linkDetecter[sesionNum].reconnectCnt >= MAX_RECONNECT_CNT)
 		{
-			if(linkDetecter[sesionNum].reconnectCnt >= MAX_RECONNECT_CNT)
-			{
-				uint8_t idx=0;
+#if 0
+			uint8_t idx=0;
 
-				for(idx=0; idx<netSesionNum; idx++)
-				{
-					linkDetecter[idx].reconnectCnt = 0;
-					linkDetecter[idx].heartbeat = 0;
-				}
-				moduleState = StateRecover;
-				ModuleRestart();
-				localFlag.cmdState = 0;
-				cleanAtCmdQueue();
-				ModuleInit();
-				ModuleRecoverSesion();
-			}
-
-			else
+			for(idx=0; idx<netSesionNum; idx++)
 			{
-				ModuleIpOpen(sesionNum);
+				linkDetecter[idx].reconnectCnt = 0;
+				linkDetecter[idx].heartbeat = 0;
 			}
+#endif
+			memset(linkDetecter, 0, sizeof(linkDetecter));
+			moduleState = StateRecover;
+			ModuleRestart();
+			localFlag.cmdState = 0;
+			cleanAtCmdQueue();
+			ModuleInit();
+			ModuleRecoverSesion();
 		}
-		netSesionTbl[sesionNum].state = ipSesionClose;
+		else
+		{
+			ModuleIpOpen(sesionNum);
+		}
 	}
+	netSesionTbl[sesionNum].state = ipSesionClose;
     if(ipOperateCb)
     {
         ipOperateCb(false, sesionNum);
@@ -1784,10 +1832,7 @@ static FnRet_t UrcSendSucessHandler(uint8_t *pData)
 		sesionNum = (uint8_t)0;
 	}
 	linkDetecter[sesionNum].heartbeat = 0;
-	//    linkDetecter[sesionNum].reconnectCnt = 0;
-	netSesionTbl[sesionNum].state = ipSesionOpened;
 	localFlag.isTransmitterBusy = 0;
-#if 1
 	if(TxDataQueue != NULL)
 	{
 		if(xQueueReceive(TxDataQueue, &data, pdMS_TO_TICKS(TASK_WAIT_MASK_TIME)) == pdPASS)
@@ -1803,7 +1848,6 @@ static FnRet_t UrcSendSucessHandler(uint8_t *pData)
 		}
 		DEBUG(DEBUG_HIGH, "[GPRS] Error: When delete data queue\r\n");
 	}
-#endif
 	return ret_fail;
 }
 
@@ -1968,7 +2012,7 @@ bool IOT_IpNetSend(uint8_t channel, uint8_t *pData, uint16_t len, ipSendCb cb)
 			TxDataQueue = xQueueCreate(TX_DATA_MAX_CNT, sizeof(TxData_t));
 			if(TxDataQueue == NULL)
 			{
-				DEBUG(DEBUG_HIGH, "[GPRS] ERROR: Create tx queue failed!\r\n");
+				DEBUG(DEBUG_HIGH, "[IOT] ERROR: Create tx queue failed!\r\n");
 				return  false;                
 			}
 		}
@@ -1989,7 +2033,7 @@ bool IOT_IpNetSend(uint8_t channel, uint8_t *pData, uint16_t len, ipSendCb cb)
 		}
 		else
 		{
-			DEBUG(DEBUG_HIGH, "[GPRS] ERROR: When Add Data to tx data queue!\r\n");
+			DEBUG(DEBUG_HIGH, "[IOT] ERROR: When Add Data to tx data queue!\r\n");
 			vPortFree(data.pData);
 		}
 
@@ -2027,7 +2071,9 @@ static void modulePowerDownPreHandle(void)
 
 		vTaskDelay(pdMS_TO_TICKS(100));
 	}while(xTaskGetTickCount() < timeOut);
-	//check all session state, if any sesion is connected close it
+	//if there has any data still store in data queue, clean it and notify APP
+	cleanTxDataQueue();
+	//check all session state, if any session is connected close it
 	for(sesionNum=0; sesionNum<netSesionNum; sesionNum++)
 	{
 		if(netSesionTbl[sesionNum].state == ipSesionOpened)
@@ -2052,6 +2098,7 @@ static void modulePowerDownPreHandle(void)
 		}
 		vTaskDelay(pdMS_TO_TICKS(100));
 	}while(xTaskGetTickCount() < timeOut);
+
 }
 
 bool IOT_PowerDown(void)
@@ -2112,6 +2159,7 @@ bool IOT_IpOpenUnblock(uint8_t channel)
 	}  
 	ModuleIpOpen(channel);
 	netSesionTbl[channel].state = ipSesionOpening;
+	netSesionTbl[channel].isActive = true;
 	return true;
 }
 
@@ -2127,7 +2175,7 @@ bool IOT_IpClose(uint8_t channel)
 		return false;
 	}
 	ModuleCloseSesion(channel);
-	netSesionTbl[channel].state = ipSesionClosing;
+	netSesionTbl[channel].isActive = false;
 	return true;
 }
 
@@ -2157,7 +2205,7 @@ netSesionState_t IOT_GetSessionState(uint8_t num)
 {
 	if(num >= netSesionNum)
 	{
-		return ipSesionInactive;
+		return ipSesionClose;
 	}
 	return netSesionTbl[num].state;
 }

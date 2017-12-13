@@ -1644,7 +1644,6 @@ TelmSesionState_t TelmProt_getSesionState(TelmSesionNum_t sesionNum)
     {
         switch(IOT_GetSessionState(sesionNum))
         {
-            case ipSesionInactive:
             case ipSesionClosing:
             case ipSesionClose:
             case ipSesionOpening:

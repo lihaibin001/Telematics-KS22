@@ -124,7 +124,7 @@ typedef struct
 {
 	uds_receiveCompleteHanler handler;
     uint16_t length;            //express the data length
-    uint16_t receivedLength;    //express the length of the data that has recieved    
+    uint16_t receivedLength;    //express the length of the data that has receive
     uint8_t payload[UDS_RECEIVE_PAYLOAD_LENGTH];
 }uds_receive_t;
 typedef struct
@@ -240,7 +240,7 @@ static uint8_t diag_uds_getSessionTypeBySecurityMode(uint8_t mode)
  *    Function: diag_uds_errorHandle
  *  Parameters: 'errId' express the error's id
  *              'errCode' express the error code
- *              'pFrame' point to the frame recieved
+ *              'pFrame' point to the frame received
  *     Returns: None
  * Description: session control service
  *********************************************************************/
@@ -1071,7 +1071,7 @@ static bool diag_uds_serviceHanndle(void)
     {
         case UDS_SRV_TYPE_SESSION_CTRL: //session control
              return diag_uds_sessionControl();
-        case UDS_SRV_TYPE_SECURITY_ACS: //serurity access
+        case UDS_SRV_TYPE_SECURITY_ACS: //security access
              return diag_uds_securityAccess();
         case UDS_SRV_TYPE_RD_BY_ID: //read data by id
              return diag_uds_readDataById();

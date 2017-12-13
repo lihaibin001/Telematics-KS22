@@ -16,7 +16,7 @@ typedef void (*ipConnectCb)(bool state, uint8_t sesinoNum);
 /*net sesion's state */
 typedef enum
 {
-	ipSesionInactive,
+//	ipSesionInactive,
     ipSesionClosing,
 	ipSesionClose,
 	ipSesionOpening,
