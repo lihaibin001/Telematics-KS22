@@ -430,7 +430,7 @@ static void RecordUploader(void)
                 }                
             }
         }
-        //check realtime
+        //check real time data
         else if(pRealtimeTmp)
         {
 
