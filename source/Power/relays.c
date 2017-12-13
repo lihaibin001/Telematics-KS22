@@ -546,6 +546,7 @@ static void rl_cs_play(void)
 static void rl_awake_to_idle(void)
 {
     Config_t config_data;
+    uint8_t *pSendBUffer = NULL;
     uint8_t activate_status=Get_Activation_Status();
 
     Get_config_data(&config_data);
@@ -555,7 +556,7 @@ static void rl_awake_to_idle(void)
         // set 2G module to sleep mode
         //GPRS_Module_GoSleep();
 
-        OS_Sleep(1000);
+       // OS_Sleep(1000);
     }
     // Save data to flash
     Save_Param();
@@ -570,16 +571,31 @@ static void rl_awake_to_idle(void)
 
     OS_Sleep(STBY_OFF_WAIT_TICKS);
 
-    // Set sleep wakeup time
-    //RTC_SetAlarmCount(RTC_GetCounter() + (uint32_t)config_data.structData.sleep_time * 60);
-//    RTC_SetAlarmCount(RTC_GetCounter() + 60);
     RTC_EnableInterupt();
     
     OS_Clr_Start_Flag(); 
     Sys_Clear_Wakeup_Src_Flags();
-    /* 2017.7.11 lihaibin modify */
     spi_flash_deepPwrDown();
-//    vATProt_Power_Off();
+    //logout first
+    pSendBUffer = pvPortMalloc(128);
+    if(pSendBUffer != NULL)
+    {
+    	uint16_t len = TelmProt_Encode(pSendBUffer,TELM_LOGOUT, MSG_ENCRYPT_AES, 128);
+    	if(len != 0)
+    	{
+    		IOT_IpNetSend(0, pSendBUffer, len, NULL);
+    	}
+    	else
+    	{
+    		DEBUG(DEBUG_HIGH, "[RELAY] Encode len error\r\n");
+    	}
+    }
+    else
+    {
+    	DEBUG(DEBUG_HIGH,"[RELAY] Malloc error. Line:%d\r\n", __LINE__);
+    }
+    IOT_PowerDown();
+    IO_4V_CTRL_OUT(Bit_RESET);
     IO_3V3_GPS_EN_OUT(Bit_RESET);
     IO_CHARGE_CTL(Bit_RESET);
     IO_LED1_CTL_OUT(Bit_SET);

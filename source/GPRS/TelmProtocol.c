@@ -348,7 +348,7 @@ extern void vTelmProt_ParseIpData(uint8_t *pData, uint16_t len, uint8_t sesionNu
                 bodyLen = TelmProt_Encode_GPS(pBody+7,bodyLen-7);
                 if(bodyLen == 0)
                 {
-                    DEBUG(DEBUG_HIGH, "[TELM] Encode gps error\r\n");
+                    DEBUG(DEBUG_HIGH, "[TELM] Encode GPS error\r\n");
                 }
                 bodyLen += 7;
                 break;
