@@ -139,7 +139,7 @@ static uint8_t rl_get_low_batt_sleep(void);
 static rl_current_state_t rl_data ;
 static bool rl_wake_up_requested;
 static Tick_Type rl_timer[NUM_RL_TIMERS];
-static bool rl_is_amp_muted;
+//static bool rl_is_amp_muted;
 static const void_fptr rl_current_state[MAX_RL_CURRENT_STATES] = 
 {
    rl_cs_idle,

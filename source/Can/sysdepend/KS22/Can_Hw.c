@@ -33,6 +33,7 @@ static void CAN_InitIO(CAN_CHANNEL_T chan);
 /*******************************************************************************
  * Code
  ******************************************************************************/
+#if 0
 static void Can_selftestCb(CAN_Type *pBase, 
                             flexcan_handle_t *pHandle, 
                             status_t status, 
@@ -61,6 +62,7 @@ static void Can_selftestCb(CAN_Type *pBase,
             break;
     }      
 }
+#endif
 #if 0
 bool CAN_sleftest(CAN_CHANNEL_T chan)
 {

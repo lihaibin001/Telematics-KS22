@@ -74,9 +74,9 @@ static uint8_t default_config[]={10u, 0u,
                                 //VIN code
                                 '3','5','3','8','1','6','0','5','2','7','8','0','2','8','0','N','E',
                                 //secret key
-                                //'h','e','n','g','e',0,0,0,0,0,0,0,0,0,0,0,
+                                'h','e','n','g','e',0,0,0,0,0,0,0,0,0,0,0,
 								//'l','i','a','o','n','i','n','g',0,0,0,0,0,0,0,0,
-                                '1','2','3','4','5','6','7','8',0,0,0,0,0,0,0,0,
+                                //'1','2','3','4','5','6','7','8',0,0,0,0,0,0,0,0,
                                 //'1','2','3','4','5','6',0,0,0,0,0,0,0,0,0,0,
                                 //crc
                                 0x00,0x00,
@@ -152,11 +152,7 @@ bool Get_Manufacture_Setting(DevInfo_Sct_t *devinfo_sct)
         )    
     {
         DEBUG(DEBUG_LOW, "[PARAM] Set manufacture...\r\n");
-        // read flash error, use default setting
         memcpy(g_devinfo_sct.byte,default_devinfo,sizeof(DevInfo_Sct_t) - 2);
-        
-        //ATProt_Get_Imei(g_devinfo_sct.structData.dev_sn);
-
         crc = crc_ccitt(crc, g_devinfo_sct.byte, sizeof(DevInfo_Sct_t) - 2) ;
         g_devinfo_sct.structData.crc[0]=(crc>>8) & 0xff;
         g_devinfo_sct.structData.crc[1]=(crc) & 0xff;
@@ -187,21 +183,34 @@ bool Set_Manufacture_Setting(DevInfo_Sct_t devinfo_sct)
         spi_flash_erase_sector(FLASH_MANUFACTURE_SETTING_OFFSET,FLASH_SECTOR_SIZE);
         OS_Sleep(100);
 
-        spi_flash_write(FLASH_MANUFACTURE_SETTING_OFFSET,
+        if(spi_flash_write(FLASH_MANUFACTURE_SETTING_OFFSET,
                             sizeof(DevInfo_Sct_t),
-                            devinfo_sct.byte);
+                            devinfo_sct.byte))
+        {
+        	DEBUG(DEBUG_HIGH, "[PARM] Write manufacture error");
+        	return false;;
+        }
         OS_Sleep(100);
-        spi_flash_read(FLASH_MANUFACTURE_SETTING_OFFSET,
+        if(spi_flash_read(FLASH_MANUFACTURE_SETTING_OFFSET,
                             sizeof(DevInfo_Sct_t),
-                            tmp_g_devinfo_sct.byte);
+                            tmp_g_devinfo_sct.byte) == 1)
+        {
+        	DEBUG(DEBUG_HIGH, "[PARM] Read manufacture error");
+        	return false;;
+        }
         if(memcmp(devinfo_sct.byte, tmp_g_devinfo_sct.byte, sizeof(DevInfo_Sct_t))==0)
         {
             return true ;
         }
+        else
+        {
+        	DEBUG(DEBUG_HIGH, "[PARM] Set manufacture error");
+        	return false;;
+        }
 //        count++;
     }
     
-    return false ;
+//    return false;
 }
 
 
@@ -295,7 +304,6 @@ bool Get_Config(Config_t *config)
 
     if(crc != ((config->structData.crc[0] << 8) + config->structData.crc[1]))
     {
-        DEBUG(DEBUG_HIGH, "Get_Config\r\n");
         Get_default_config(config);
         return false;
     }
@@ -515,8 +523,8 @@ extern uint32_t sys_get_cur_sec_offset(void)
             utc.minute = (((curGpsUtc[11] - '0') * 10) + (curGpsUtc[12] - '0'));
             utc.second = (((curGpsUtc[13] - '0') * 10) + (curGpsUtc[14] - '0'));
 
-            // current UTC time plus 8 hours for GMT +8
-            RTC_SetTimeCount(RTC_ConvertDatetimeToSeconds(&utc)+28800);
+            // Set UTC time
+            RTC_SetTimeCount(RTC_ConvertDatetimeToSeconds(&utc));
             rtc_inited = 1;
       }
       return sys_get_sec_offset(&curGpsUtc[1]);   

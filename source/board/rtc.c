@@ -57,23 +57,42 @@ void BOARD_SetRtcClockSource(void)
     RTC->CR |= RTC_CR_OSCE_MASK;
 }
 
+//get data in NMEA format
 uint8_t RTC_GetTime(uint8_t *rtc_time)
 {
+	if(rtc_time == NULL)
+	{
+		return 1;
+	}
     rtc_datetime_t datetime;
     RTC_GetDatetime(RTC,&datetime);
     if (datetime.year > 2000)
     {
-        *rtc_time=(uint8_t)((datetime.year - 2000) & 0xFF);
+//        *rtc_time=(uint8_t)((datetime.year - 2000) & 0xFF);
+        *rtc_time=(datetime.year/1000)+'0';
+        *(rtc_time+1)=((datetime.year/100)%10)+'0';
+        *(rtc_time+2)=((datetime.year/10)%10)+'0';
+        *(rtc_time+3)=(datetime.year%10)+'0';
     }
     else
     {
-        *rtc_time = (uint8_t )((datetime.year - 1900) & 0xFF);
+//        *rtc_time = (uint8_t )((datetime.year - 1900) & 0xFF);
+        *rtc_time='1';
+        *(rtc_time+1)='9';
+        *(rtc_time+2)=((datetime.year/10)%10)+'0';
+        *(rtc_time+3)=(datetime.year%10)+'0';
     }
-    *(rtc_time+1)=datetime.month;
-    *(rtc_time+2)=datetime.day;
-    *(rtc_time+3)=datetime.hour;
-    *(rtc_time+4)=datetime.minute;
-    *(rtc_time+5)=datetime.second;
+    *(rtc_time+4)=(datetime.month/10)+'0';
+    *(rtc_time+5)=(datetime.month%10)+'0';
+    *(rtc_time+6)=(datetime.day/10)+'0';
+    *(rtc_time+7)=(datetime.day%10)+'0';
+    *(rtc_time+8)=(datetime.hour/10)+'0';
+    *(rtc_time+9)=(datetime.hour%10)+'0';
+    *(rtc_time+10)=(datetime.minute/10)+'0';
+    *(rtc_time+11)=(datetime.minute%10)+'0';
+    *(rtc_time+12)=(datetime.second/10)+'0';
+    *(rtc_time+13)=(datetime.second%10)+'0';
+
     return 0;
 }
 
@@ -81,6 +100,7 @@ uint32_t RTC_GetCounter(void)
 {
     return RTC->TSR;
 }
+
 
 void RTC_EnableInterupt(void)
 {

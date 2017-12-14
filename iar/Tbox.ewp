@@ -315,12 +315,10 @@
           <state>$PROJ_DIR$/../rtos/Source/portable/IAR/ARM_CM4F</state>
           <state>$PROJ_DIR$/../rtos/Source/include</state>
           <state>$PROJ_DIR$/../CMSIS/Include</state>
-          <state>$PROJ_DIR$/../devices</state>
           <state>$PROJ_DIR$/../devices/MKS22F12/drivers</state>
           <state>$PROJ_DIR$/../devices/MKS22F12/utilities</state>
           <state>$PROJ_DIR$/../rtos/Source</state>
           <state>$PROJ_DIR$/../devices/MKS22F12</state>
-          <state>$PROJ_DIR$/..\devices\MKS22F12</state>
           <state>$PROJ_DIR$/..\source\board</state>
           <state>$PROJ_DIR$/..\source\common</state>
           <state>$PROJ_DIR$/..\source\SysMan</state>
@@ -329,14 +327,9 @@
           <state>$PROJ_DIR$/..\source\GPRS</state>
           <state>$PROJ_DIR$/..\source\Diag_Factory</state>
           <state>$PROJ_DIR$/..\source\user</state>
-          <state>$PROJ_DIR$/..\source\include</state>
-          <state>$PROJ_DIR$/..\source\Can</state>
           <state>$PROJ_DIR$/..\source\Can\sysdepend\KS22</state>
-          <state>$PROJ_DIR$/..\source\include\arm</state>
           <state>$PROJ_DIR$/..\source\mbed_tls</state>
-          <state>$PROJ_DIR$/..\source\openxc</state>
-          <state>$PROJ_DIR$/</state>
-          <state>$PROJ_DIR$/..\middleware\dma_manager_2.0.0</state>
+          <state>$PROJ_DIR$\.\middleware\dma_manager_2.0.0</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>

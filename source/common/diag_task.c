@@ -44,15 +44,19 @@
 /*********************************************************************/
 /* Constant and Macro Definitions using #define                      */
 /*********************************************************************/
+
+#define UDS_FC_BS					(uint8_t)8
+#define UDS_FC_ST					(uint8_t)20
+#define UDS_FC_WFT					(uint8_t)0
+
 /*USER DEFINITION*/
-#define UDS_RECEIVE_PAYLOAD_LENGTH  (uint8_t)64
-#define UDS_SEND_DATA_LENGTH        (uint8_t)64
+#define UDS_RECEIVE_PAYLOAD_LENGTH  (uint8_t)(UDS_FC_BS * 8)
+#define UDS_SEND_DATA_LENGTH        (uint8_t)(UDS_FC_BS * 8)
 /* UDS data type define */
 #define UDS_DATA_TYPE_SINGLE        (uint8_t)0
 #define UDS_DATA_TYPE_FIRST         (uint8_t)1
 #define UDS_DATA_TYPE_CONSECUTIVE   (uint8_t)2
 #define UDS_DATA_TYPE_FLOWCONTROL   (uint8_t)3
-
 
 /* UDS service type */
 #define UDS_SRV_TYPE_SESSION_CTRL   (uint8_t)0x10   //session control service
@@ -61,7 +65,7 @@
 #define UDS_SRV_TYPE_COM_CTRL		(uint8_t)0x28   //communication control
 #define UDS_SRV_TYPE_TESTER_PRESENT (uint8_t)0x3E   //tester present
 #define UDS_SRV_TYPE_CTRL_DCT_SET	(uint8_t)0x85	//control DTC setting
-
+/* UDS service ID define */
 #define UDS_SRV_TYPE_RD_BY_ID       (uint8_t)0x22   //read data by id service
 #define UDS_SRV_TYPE_RD_MEM_BY_AD	(uint8_t)0x23   //read memory by address
 #define UDS_SRV_TYPE_RD_BY_PDID		(uint8_t)0x2A	//read data by periodic identifier
@@ -80,7 +84,7 @@
 #define UDS_SRV_TYPE_REQ_DOWLOAD	(uint8_t)0x34	//request download
 #define UDS_SRV_TYPE_DATA_TRANS		(uint8_t)0x36	//transfer data
 #define UDS_SRV_TYPE_REQ_EXT_TRANS	(uint8_t)0x37	//request transfer exit
-/* uds session type */
+/* UDS session type */
 #define UDS_SESSION_TYPE_DEFAULT    (uint8_t)0x01   //default session
 #define UDS_SESSION_TYPE_FLUSH      (uint8_t)0x02   //flush session
 #define UDS_SESSION_TYPE_EXTEND     (uint8_t)0x03   //extend session
@@ -110,9 +114,9 @@
 #define TEMP_AD_REF_VOL (330)
 
 //#define LOW_VOLTAGE_ALARM_THRESHOLD (290)
-#define P2_CAN_SERVER_MAX           (uint16_t)0xFFFF
+#define P2_CAN_SERVER_MAX           (uint16_t)75
 #define UDS_RX_TIME_OUT             MSec_To_Ticks(P2_CAN_SERVER_MAX)
-#define P2_ENH_CAN_SERVER_MAX       (uint16_t)0xFFFF
+#define P2_ENH_CAN_SERVER_MAX       (uint16_t)150
 
 #define UDS_RESPONSE_ID             FLEXCAN_ID_STD(0x7E8)
 /*********************************************************************/
@@ -129,6 +133,7 @@ typedef struct
 }uds_receive_t;
 typedef struct
 {
+	uint32_t id;
     uint16_t length;  //the length of the data to be send
     uint16_t sentLength;  //the length of the data that have sent
     uint8_t data[UDS_SEND_DATA_LENGTH];  //store the data to be send
@@ -164,7 +169,7 @@ static const void_int16_fptr event_handler[DIAG_NUM_EVENTS] =
 };
 
 /*********************************************************************/
-/* Global and Const Variable Defining Definitions / Initializations  */
+/* Global and const Variable Defining Definitions / Initializations  */
 /*********************************************************************/
 
 /*********************************************************************/
@@ -270,7 +275,6 @@ static bool diag_uds_sessionControl()
         diag_uds_errorHandle(uds_rx_buffer.payload[0], 0x13);
         return false;
     }
-    
     switch(uds_rx_buffer.payload[1])
     {
         case UDS_SESSION_TYPE_DEFAULT:
@@ -317,18 +321,28 @@ static bool diag_uds_SA_reequesetSeed(uint8_t mode)
         diag_uds_errorHandle(uds_rx_buffer.payload[0], 0x7E);
         return false;        
     }
-    RNGA_Init(RNG);
-    do
+    if(1)
     {
-        RNGA_GetRandomData(RNG, &seed, sizeof(seed));  
-    }while(seed == 0 || seed == 0xFFFFFFFF);
+		RNGA_Init(RNG);
+		do
+		{
+			RNGA_GetRandomData(RNG, &seed, sizeof(seed));
+		}while(seed == 0 || seed == 0xFFFFFFFF);
+	    uds_tx_buffer.data[3] = (seed >> 24) & 0xFF;
+	    uds_tx_buffer.data[4] = (seed >> 16) & 0xFF;
+	    uds_tx_buffer.data[5] = (seed >> 8) & 0xFF;
+	    uds_tx_buffer.data[6] = seed & 0xFF;
+    }
+    else
+    {
+	    uds_tx_buffer.data[3] = 0;
+	    uds_tx_buffer.data[4] = 0;
+	    uds_tx_buffer.data[5] = 0;
+	    uds_tx_buffer.data[6] = 0;
+    }
     uds_tx_buffer.data[0] = 0x06;
     uds_tx_buffer.data[1] = 0x67;
     uds_tx_buffer.data[2] = 0x01;
-    uds_tx_buffer.data[3] = (seed >> 24) & 0xFF;
-    uds_tx_buffer.data[4] = (seed >> 16) & 0xFF;
-    uds_tx_buffer.data[5] = (seed >> 8) & 0xFF;
-    uds_tx_buffer.data[6] = seed & 0xFF;
     uds_tx_buffer.data[7] = 0x00;
     uds_tx_buffer.length = 7;
     uds_securityLevel = mode;                   
@@ -459,7 +473,6 @@ static bool diag_uds_diagGprsModule(void)
     uds_tx_buffer.data[2] = uds_rx_buffer.payload[1];
     uds_tx_buffer.data[3] = uds_rx_buffer.payload[2];
     uds_tx_buffer.data[4] = IOT_IsIpTransOk();
-    //memset(&uds_tx_buffer.data[5], 0, 3);
     uds_tx_buffer.length = 5;
     return true;
 }
@@ -470,7 +483,6 @@ static bool diag_uds_diagGpsModules(void)
     uds_tx_buffer.data[2] = uds_rx_buffer.payload[1];
     uds_tx_buffer.data[3] = uds_rx_buffer.payload[2];
     uds_tx_buffer.data[4] = vGps_Get_Gps_Status();
-    //memset(&uds_tx_buffer.data[5], 0, 3);
     uds_tx_buffer.length = 5;
     return true;
 }
@@ -483,7 +495,6 @@ static bool diag_uds_readVolage(void)
     uds_tx_buffer.data[3] = uds_rx_buffer.payload[2];
     uds_tx_buffer.data[4] = voltage & 0xFF;
     uds_tx_buffer.data[5] = (voltage >> 8) & 0xFF;
-    //memset(&uds_tx_buffer.data[6], 0, 2);
     uds_tx_buffer.length = 6;
     return true;    
 }
@@ -496,7 +507,6 @@ static bool diag_uds_readInternalVolage(void)
     uds_tx_buffer.data[3] = uds_rx_buffer.payload[2];
     uds_tx_buffer.data[4] = voltage & 0xFF;
     uds_tx_buffer.data[5] = (voltage >> 8) & 0xFF;
-    //memset(&uds_tx_buffer.data[6], 0, 2);
     uds_tx_buffer.length = 6;
     return true;    
 }
@@ -507,7 +517,6 @@ static bool diag_uds_readCsq(void)
     uds_tx_buffer.data[2] = uds_rx_buffer.payload[1];
     uds_tx_buffer.data[3] = uds_rx_buffer.payload[2];
     uds_tx_buffer.data[4] = IOT_GetCsq();
-    //memset(&uds_tx_buffer.data[5], 0, 3);
     uds_tx_buffer.length = 5;
     return true;     
 }
@@ -522,7 +531,6 @@ static bool diag_uds_readFlashInfo(void)
     uds_tx_buffer.data[4] = VenderId;
     uds_tx_buffer.data[5] = DevId[0];
     uds_tx_buffer.data[6] = DevId[1];
-    //memset(&uds_tx_buffer.data[6], 0, 3);
     uds_tx_buffer.length = 5;
     return true;      
 }
@@ -533,7 +541,6 @@ static bool diag_uds_diagFlash(void)
     uds_tx_buffer.data[2] = uds_rx_buffer.payload[1];
     uds_tx_buffer.data[3] = uds_rx_buffer.payload[2];
     uds_tx_buffer.data[4] = spi_flash_is_ok();
-    //memset(&uds_tx_buffer.data[5], 0, 3);
     uds_tx_buffer.length = 5;
     return true;
 }
@@ -1099,7 +1106,7 @@ static bool diag_uds_parseData(uint8_t *pFrame)
     }
     switch((pFrame[0] >> 4) & 0x0F)
     {
-        case UDS_DATA_TYPE_SINGLE:   
+        case UDS_DATA_TYPE_SINGLE:
             unitType = UDS_DATA_TYPE_SINGLE;
             if(pFrame[1]  == 0x3E)
             {
@@ -1115,15 +1122,25 @@ static bool diag_uds_parseData(uint8_t *pFrame)
         case UDS_DATA_TYPE_FIRST:
             unitType = UDS_DATA_TYPE_FIRST;
             uds_rx_buffer.length = (((pFrame[0] << 8) & 0x0F ) | pFrame[1]);
+            if(uds_rx_buffer.length < UDS_FIRSR_FRAME_MAX_LEN)
+            {
+            	//length error
+            	diag_uds_errorHandle(pFrame[2], 0x13);
+            	break;
+            }
             memcpy(uds_rx_buffer.payload, &pFrame[2], 6);
             uds_rx_buffer.receivedLength = 6;
             sn = 1;
             break;
         case UDS_DATA_TYPE_CONSECUTIVE:
+        	if(sn == 0)
+        	{
+        		return false;
+        	}
             if(uds_rx_buffer.length > UDS_FIRSR_FRAME_MAX_LEN)
             {
                 unitType = UDS_DATA_TYPE_CONSECUTIVE;
-                if((pFrame[0] & 0x0F) !=  sn)
+                if((pFrame[0] & 0x0F) != sn)
                 {
                     return false;
                 }
@@ -1153,18 +1170,13 @@ static void diag_evt_uds_evt(int16_t data)
     static TickType_t uds_rx_previousTime;
     uint8_t canData[8] = "";
     flexcan_frame_t frame = {0};
-    
-    TickType_t osTime = OS_Time();
-    int32_t interval = osTime - uds_rx_previousTime;
-    DEBUG(DEBUG_LOW, "[DIAG] RX interval:%d\r\n", interval);
-    interval = interval < 0 ?  (0xFFFFFFFF % interval) : interval;
         
-    if(interval > UDS_RX_TIME_OUT)
+    if(OS_Time() - uds_rx_previousTime > UDS_RX_TIME_OUT)
     {
         uds_sessionType = UDS_SESSION_TYPE_DEFAULT;
         uds_securityLevel = UDS_SECURITY_STANDBY;      
     }
-    uds_rx_previousTime = osTime;
+    uds_rx_previousTime = OS_Time();
     UDS_GetData(&frame);
     canData[0] = frame.dataByte0;
     canData[1] = frame.dataByte1;
@@ -1174,12 +1186,14 @@ static void diag_evt_uds_evt(int16_t data)
     canData[5] = frame.dataByte5;
     canData[6] = frame.dataByte6;
     canData[7] = frame.dataByte7;
+#if DEBUG_LVL == DEBUG_LOW
     DEBUG(DEBUG_LOW, "\r\n[DIAG] Receive from client:\r\n");
     for(uint8_t i=0; i<8; i++)
     {
         DEBUG(DEBUG_LOW, "%02x ",canData[i]);
     }
     DEBUG(DEBUG_LOW, "\r\n\r\n"); 
+#endif
     diag_uds_parseData(canData);
     diag_uds_rx_handleHook();
 }
