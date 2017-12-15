@@ -35,6 +35,7 @@ bool IOT_IpNetSend(uint8_t channel, uint8_t *pData, uint16_t len, ipSendCb cb);
 bool IOT_IpOpen(uint8_t channel, uint32_t waitTime);
 bool IOT_IpOpenUnblock(uint8_t channel);
 bool IOT_IpClose(uint8_t channel);
+bool IOT_IpReconnect(uint8_t channel);
 bool IOT_Restart(void);
 bool IOT_isModuleReady(void);
 netSesionState_t IOT_GetSessionState(uint8_t num);

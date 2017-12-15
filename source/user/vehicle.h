@@ -101,4 +101,5 @@ bool VHCL_CAN_Init(void);
 void UDS_GetData(flexcan_frame_t *pData);
 void UDS_SetData(flexcan_frame_t *pData);
 uint8_t VHCL_getAlarmLevel(void);
+void VHCL_CAN_ResetDataList(void);
 #endif //__VEHICLE_STATUS_H__

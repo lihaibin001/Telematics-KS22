@@ -149,6 +149,7 @@ static uint8_t sesionState[TELM_SESION_NUM];
 static ipSendCb respHandler = NULL;
 static uint8_t *pTmpKey = NULL;
 static bool encodeLock;
+static uint8_t heartBeatCnt = 0;
 /**********************************************************************
  * Private variable with File Level Scope
  *********************************************************************/
@@ -263,10 +264,13 @@ extern void vTelmProt_ParseIpData(uint8_t *pData, uint16_t len, uint8_t sesionNu
         {
             case 0x01:
                 sesionState[sesionNum] = (uint8_t)TELM_SESION_LOGINED;
-                break;;
+                break;
             case 0x04:
                 sesionState[sesionNum] = (uint8_t)TELM_SESION_LOGOUTED;
                 break;
+            case 0x07:
+            	heartBeatCnt = 0;
+            	break;
             default:
                 break;    
         }
@@ -1548,16 +1552,21 @@ uint16_t TelmProt_Encode_Extended(uint8_t* const encoded, uint16_t buffsize)
 
 
             tmp_data->structData.msg_id = 0x80;
+#if 0
+            uint16_t dataLne = TELM_INFO_LEN_EXTENDED - 3;
+            tmp_data->structData.length[0] = (dataLne >> 8 & 0xFF);
+            tmp_data->structData.length[1] = dataLne & 0xFF;
+#endif
+#if 1
             tmp_data->structData.length[0] = (TELM_INFO_LEN_EXTENDED >> 8 & 0xFF);
             tmp_data->structData.length[1] = TELM_INFO_LEN_EXTENDED & 0xFF;
-            
+#endif
             tmp_data->structData.charge_finish_time[0] = 0x03;
             tmp_data->structData.charge_finish_time[1] = 0xFF;
             
             tmp_data->structData.remain_power = ((CanDataList[id_0x1804FFF4].dataByte7 << 8) 
                                                  | CanDataList[id_0x1804FFF4].dataByte6) / 1000;
             
-            //lihaibin modify
             uint16_t drive_mileage = tmp_data->structData.remain_power * 7;
             tmp_data->structData.drive_mileage[0] = drive_mileage >> 8 & 0xFF;
             tmp_data->structData.drive_mileage[1] = drive_mileage & 0xFF;
@@ -1635,6 +1644,16 @@ void TelmProt_Sleep_NV_Write(void)
 void TelmProt_Travel_Summary_Record(void)
 {
 
+}
+
+uint8_t TelmProtGetHeartbeatCnt(void)
+{
+	return heartBeatCnt;
+}
+
+void TelmProtHeartbeatsThrob(void)
+{
+	heartBeatCnt++;
 }
 
 TelmSesionState_t TelmProt_getSesionState(TelmSesionNum_t sesionNum)

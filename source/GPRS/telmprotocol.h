@@ -487,6 +487,8 @@ bool TelmProt_backupData(TelmRealtime_t *pBuffer);
 bool TelmProt_getBackupData(TelmRealtime_t *pBuffer);
 bool TelmProt_preGetBackupData(void);
 void TelmProt_connectHandler(bool state, uint8_t channel);
+uint8_t TelmProtGetHeartbeatCnt(void);
+void TelmProtHeartbeatsThrob(void);
 #endif
 
 /*=======================================================================================*\

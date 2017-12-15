@@ -52,7 +52,7 @@
 #define RECORD_ALRM_BCKP_CNT       30
 
 #define MAX_TIME_TASK_WAIT              10 //ms
-#define DEFAULT_RECORD_INTERVAL         30000 //ms
+#define DEFAULT_RECORD_INTERVAL         5000 //ms
 #define DEFAULT_HEART_BEART_INTERVAL    15000
 #define RECORD_SEND_TIMEOUT             60000
 
@@ -214,100 +214,106 @@ static void logStateDetetor(void)
 {
     uint8_t *pSendBufer = NULL;
     uint16_t len = 0;
-    if(loginTimes == 0xFF)
+    if(IOT_GetSessionState(TELM_ENTERPRISE_SESION) == ipSesionOpened)
     {
-        if(logtimeout <= xTaskGetTickCount())
-        {
-            IOT_IpOpenUnblock(TELM_ENTERPRISE_SESION);
-            loginTimes = 0;
-        }
-    }
-    if(loginTimes != 0xFF && TelmProt_getSesionState(TELM_ENTERPRISE_SESION) == TELM_SESION_ACTIVE)
-    {
-        pSendBufer = pvPortMalloc(128);
-        if(pSendBufer == NULL)
-        {
-            return ;
-        }
-        len = TelmProt_Encode(pSendBufer, TELM_LOGIN,MSG_ENCRYPT_AES, 128);
-        if(len == 0)
-        {
-            DEBUG(DEBUG_MEDIUM, "[RECORD] Encode login data length 0\r\n");
-        }
-        else if(IOT_IpNetSend(TELM_ENTERPRISE_SESION,pSendBufer, len, NULL ))
-        {
-            logtimeout = pdMS_TO_TICKS(60000) + xTaskGetTickCount();
-            loginTimes++;
-            TelmProt_setSesionState(TELM_ENTERPRISE_SESION, TELM_SESION_LOGINING);
-        }
-        else
-        {
-            vPortFree(pSendBufer);
-            pSendBufer = NULL;
-            return ;
-        }
-    }
-    else if(TelmProt_getSesionState(TELM_ENTERPRISE_SESION) == TELM_SESION_LOGINING)
-    {
-        if(loginTimes >= 3)
-        {
-            loginTimes = 0xFF;
-            logtimeout = pdMS_TO_TICKS(60000*30) + xTaskGetTickCount();
-            TelmProt_setSesionState(TELM_ENTERPRISE_SESION, TELM_SESION_ACTIVE);
-            IOT_IpClose(TELM_ENTERPRISE_SESION);
-        }
-        else if(logtimeout <= xTaskGetTickCount())
-        {
-            TelmProt_setSesionState(TELM_ENTERPRISE_SESION, TELM_SESION_ACTIVE);
-        }
-    }
-    else if(TelmProt_getSesionState(TELM_ENTERPRISE_SESION) == TELM_SESION_LOGINED)
-    {
-        loginTimes = 0;
+		if(loginTimes == 0xFF)
+		{
+			if(logtimeout <= xTaskGetTickCount())
+			{
+				IOT_IpOpenUnblock(TELM_ENTERPRISE_SESION);
+				loginTimes = 0;
+			}
+		}
+		if(loginTimes != 0xFF && TelmProt_getSesionState(TELM_ENTERPRISE_SESION) == TELM_SESION_ACTIVE)
+		{
+			pSendBufer = pvPortMalloc(128);
+			if(pSendBufer == NULL)
+			{
+				return ;
+			}
+			len = TelmProt_Encode(pSendBufer, TELM_LOGIN,MSG_ENCRYPT_AES, 128);
+			if(len == 0)
+			{
+				DEBUG(DEBUG_MEDIUM, "[RECORD] Encode login data length 0\r\n");
+			}
+			else if(IOT_IpNetSend(TELM_ENTERPRISE_SESION,pSendBufer, len, NULL ))
+			{
+				logtimeout = pdMS_TO_TICKS(60000) + xTaskGetTickCount();
+				loginTimes++;
+				TelmProt_setSesionState(TELM_ENTERPRISE_SESION, TELM_SESION_LOGINING);
+			}
+			else
+			{
+				vPortFree(pSendBufer);
+				pSendBufer = NULL;
+				return ;
+			}
+		}
+		else if(TelmProt_getSesionState(TELM_ENTERPRISE_SESION) == TELM_SESION_LOGINING)
+		{
+			if(loginTimes >= 3)
+			{
+				loginTimes = 0xFF;
+				logtimeout = pdMS_TO_TICKS(60000*30) + xTaskGetTickCount();
+				TelmProt_setSesionState(TELM_ENTERPRISE_SESION, TELM_SESION_ACTIVE);
+				IOT_IpClose(TELM_ENTERPRISE_SESION);
+			}
+			else if(logtimeout <= xTaskGetTickCount())
+			{
+				TelmProt_setSesionState(TELM_ENTERPRISE_SESION, TELM_SESION_ACTIVE);
+			}
+		}
+		else if(TelmProt_getSesionState(TELM_ENTERPRISE_SESION) == TELM_SESION_LOGINED)
+		{
+			loginTimes = 0;
+		}
     }
     //check GB platform
-    if(gbLogTimeout == 0xFF)
+    if(IOT_GetSessionState(TELM_GB_SESION) == ipSesionOpened)
     {
-        if(gbLogTimeout <= xTaskGetTickCount())
-        {
-            gbLogTimeout = 0;
-        }
-    }
-    if(gbLogTimeout != 0xFF && TelmProt_getSesionState(TELM_GB_SESION) == TELM_SESION_ACTIVE)
-    {
-        if(pSendBufer == NULL)
-        {
-            pSendBufer = pvPortMalloc(sizeof(TelmRealtime_t));
-            if(pSendBufer == NULL)
-            {
-                return ;
-            }
-        }
-        len = TelmProt_Encode(pSendBufer, TELM_LOGIN,MSG_ENCRYPT_AES, 128);
-        if(IOT_IpNetSend(TELM_GB_SESION,pSendBufer, len, NULL ))
-        {
-            gbLogTimeout = pdMS_TO_TICKS(60000) + xTaskGetTickCount();
-            loginTimes++;
-            TelmProt_setSesionState(TELM_GB_SESION, TELM_SESION_LOGINING);
-        }
-    }
-    else if(TelmProt_getSesionState(TELM_GB_SESION) == TELM_SESION_LOGINING)
-    {
-        if(gbLoginTimes >= 3)
-        {
-            loginTimes = 0xFF;
-            logtimeout = pdMS_TO_TICKS(60000*30) + xTaskGetTickCount();
-            TelmProt_setSesionState(TELM_GB_SESION, TELM_SESION_ACTIVE);
-        }
-        else if(logtimeout <= xTaskGetTickCount())
-        {
-            
-            TelmProt_setSesionState(TELM_GB_SESION, TELM_SESION_ACTIVE);
-        }
-    }
-    else if(TelmProt_getSesionState(TELM_GB_SESION) == TELM_SESION_LOGINED)
-    {
-        gbLoginTimes = 0;
+		if(gbLogTimeout == 0xFF)
+		{
+			if(gbLogTimeout <= xTaskGetTickCount())
+			{
+				gbLogTimeout = 0;
+			}
+		}
+		if(gbLogTimeout != 0xFF && TelmProt_getSesionState(TELM_GB_SESION) == TELM_SESION_ACTIVE)
+		{
+			if(pSendBufer == NULL)
+			{
+				pSendBufer = pvPortMalloc(sizeof(TelmRealtime_t));
+				if(pSendBufer == NULL)
+				{
+					return ;
+				}
+			}
+			len = TelmProt_Encode(pSendBufer, TELM_LOGIN,MSG_ENCRYPT_AES, 128);
+			if(IOT_IpNetSend(TELM_GB_SESION,pSendBufer, len, NULL ))
+			{
+				gbLogTimeout = pdMS_TO_TICKS(60000) + xTaskGetTickCount();
+				loginTimes++;
+				TelmProt_setSesionState(TELM_GB_SESION, TELM_SESION_LOGINING);
+			}
+		}
+		else if(TelmProt_getSesionState(TELM_GB_SESION) == TELM_SESION_LOGINING)
+		{
+			if(gbLoginTimes >= 3)
+			{
+				loginTimes = 0xFF;
+				logtimeout = pdMS_TO_TICKS(60000*30) + xTaskGetTickCount();
+				TelmProt_setSesionState(TELM_GB_SESION, TELM_SESION_ACTIVE);
+			}
+			else if(logtimeout <= xTaskGetTickCount())
+			{
+
+				TelmProt_setSesionState(TELM_GB_SESION, TELM_SESION_ACTIVE);
+			}
+		}
+		else if(TelmProt_getSesionState(TELM_GB_SESION) == TELM_SESION_LOGINED)
+		{
+			gbLoginTimes = 0;
+		}
     }
     if(pSendBufer)
     {
@@ -320,9 +326,15 @@ static void heartBeatUploader(void)
 {
     uint8_t *pSendBufer = NULL;
     uint16_t len = 0;
+
     if(TelmProt_getSesionState(TELM_ENTERPRISE_SESION) == TELM_SESION_LOGINED)
     {
-        if(heartbeatTimer <= xTaskGetTickCount())
+    	if(TelmProtGetHeartbeatCnt() >= 4)
+    	{
+    		IOT_IpReconnect(TELM_ENTERPRISE_SESION);
+    		TelmProt_setSesionState(TELM_ENTERPRISE_SESION, TELM_SESION_ACTIVE);
+    	}
+    	else if(heartbeatTimer <= xTaskGetTickCount())
         {
             if(pSendBufer == NULL)
             {
@@ -335,11 +347,12 @@ static void heartBeatUploader(void)
             len = TelmProt_Encode(pSendBufer, TELM_HEARTBEAT,MSG_ENCRYPT_NONE, 128);
             if(len == 0)
             {
-                DEBUG(DEBUG_HIGH, "[RECORD] encode heartbeat error:len=0\r\n");
+                DEBUG(DEBUG_HIGH, "[RECORD] encode heart beat error:len=0\r\n");
             }
             else if(IOT_IpNetSend(TELM_ENTERPRISE_SESION, pSendBufer, len, NULL ))
             {
                  heartbeatTimer = pdMS_TO_TICKS(DEFAULT_HEART_BEART_INTERVAL) + xTaskGetTickCount();
+                 TelmProtHeartbeatsThrob();
             }           
         }
     }
@@ -544,6 +557,7 @@ static void backupSendResHandle(bool sendRes, uint8_t channel)
 
 static void prvRecord_evt_nop(int16_t data)
 {
+
 }
 /*******************************************************************************
 *    Function:  prvRecord_evt_rltmTalRefresh
@@ -571,6 +585,14 @@ static void prvRecord_evt_rltmTalRefresh(int16_t data)
          sizeof(Telm_Data_Batt_Temp));
     TelmProt_Encode_Extended((uint8_t *const)&rltmInfoTbl.rltmInfo[rltmInfoTbl.idx].extInof,
          sizeof(Telm_Data_Extended));
+    const flexcan_frame_t *CanDataList = VHCL_CAN_GetDataList();
+    if(CanDataList)
+    {
+    	//reset can buffer
+    	VHCL_CAN_ResetDataList();
+    	VHCL_CAN_GiveDataList();
+    }
+
     rltmInfoTbl.idx++;
 
     if(rltmInfoTbl.idx == RECORD_ALRM_BCKP_CNT)
@@ -589,6 +611,89 @@ static void prvRecord_evt_rltmTalRefresh(int16_t data)
 *******************************************************************************/
 static void prvRecord_evt_Level3Alarm(int16_t data)
 {
+	//backup all data
+	uint8_t idx;
+	uint8_t tmpIdx;
+	if(data == LEVEL3_ALARM_ASSERT)
+	{
+		TelmRealtime_t *pSendBufer = pvPortMalloc(sizeof(TelmRealtime_t));
+		if(pSendBufer == NULL)
+		{
+			DEBUG(DEBUG_HIGH, "[RECORD] Malloc err. Line:%d\r\n", __LINE__);
+			return ;
+		}
+		if(rltmInfoTbl.isFull)
+		{
+			if(rltmInfoTbl.idx == 0)
+			{
+				tmpIdx = rltmInfoTbl.idx;
+				for(idx=0; idx<RECORD_ALRM_BCKP_CNT; idx++)
+				{
+					rltmInfoTbl.idx++;
+					if(rltmInfoTbl.idx == RECORD_ALRM_BCKP_CNT)
+					{
+						rltmInfoTbl.idx = 0;
+					}
+					pSendBufer->len = TelmProt_Encode(pSendBufer->data, TELM_REALTIME,MSG_ENCRYPT_AES, 512);
+					recordTimer = pdMS_TO_TICKS(recordInteral) + xTaskGetTickCount();
+					TelmProt_backupData(pSendBufer);
+
+				}
+			}
+			else
+			{
+				tmpIdx = rltmInfoTbl.idx;
+				for(idx=tmpIdx; idx<RECORD_ALRM_BCKP_CNT; idx++)
+				{
+					rltmInfoTbl.idx++;
+					if(rltmInfoTbl.idx == RECORD_ALRM_BCKP_CNT)
+					{
+						rltmInfoTbl.idx = 0;
+					}
+					pSendBufer->len = TelmProt_Encode(pSendBufer->data, TELM_REALTIME,MSG_ENCRYPT_AES, 512);
+					recordTimer = pdMS_TO_TICKS(recordInteral) + xTaskGetTickCount();
+					TelmProt_backupData(pSendBufer);
+
+				}
+				rltmInfoTbl.idx = 0;
+				for(idx=0; idx<tmpIdx; idx++)
+				{
+					rltmInfoTbl.idx++;
+					pSendBufer->len = TelmProt_Encode(pSendBufer->data, TELM_REALTIME,MSG_ENCRYPT_AES, 512);
+					recordTimer = pdMS_TO_TICKS(recordInteral) + xTaskGetTickCount();
+					TelmProt_backupData(pSendBufer);
+
+				}
+			}
+		}
+		else
+		{
+			if(rltmInfoTbl.idx != 0)
+			{
+				tmpIdx = rltmInfoTbl.idx;
+				rltmInfoTbl.idx=0;
+				for(idx=0; idx<tmpIdx; idx++)
+				{
+					rltmInfoTbl.idx++;
+					pSendBufer->len = TelmProt_Encode(pSendBufer->data, TELM_REALTIME,MSG_ENCRYPT_AES, 512);
+					recordTimer = pdMS_TO_TICKS(recordInteral) + xTaskGetTickCount();
+					TelmProt_backupData(pSendBufer);
+
+				}
+			}
+		}
+		if(pSendBufer)
+		{
+			vPortFree(pSendBufer);
+			pSendBufer = NULL;
+		}
+		rltmInfoTbl.idx = 0;
+		recordInteral = RECORD_ARARM_INTERVAL;
+	}
+	else
+	{
+		recordInteral = DEFAULT_RECORD_INTERVAL;
+	}
 }
 
 static void prvRecord_evt_CleanRecord(int16_t data)

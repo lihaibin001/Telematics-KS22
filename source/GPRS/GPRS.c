@@ -2179,6 +2179,17 @@ bool IOT_IpClose(uint8_t channel)
 	return true;
 }
 
+bool IOT_IpReconnect(uint8_t channel)
+{
+	if(channel >= netSesionNum)
+	{
+		return false;
+	}
+	ModuleCloseSesion(channel);
+	netSesionTbl[channel].isActive = true;
+	return true;
+}
+
 bool IOT_Restart(void)
 {
 	ModuleRestart();

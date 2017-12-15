@@ -91,6 +91,7 @@
 #define UDS_SESSION_TYPE_DEV        (uint8_t)0x40   //developer session
 #define UDS_SESSION_TYPE_VENDER     (uint8_t)0x60   //vender session
 /* uds security access mode */
+#if 1
 #define UDS_SECURITY_STANDBY        (uint8_t)0x00
 #define UDS_SECURITY_EXTEND         (uint8_t)0x01
 #define UDS_SECURITY_EXTEND_OK      (uint8_t)0x02
@@ -102,9 +103,12 @@
 #define UDS_SECURITY_GURAD_OK       (uint8_t)0x0A
 #define UDS_SECURITY_VENDER         (uint8_t)0x61
 #define UDS_SECURITY_VENDER_OK      (uint8_t)0x62
+#endif
 /* UDS security access level */
-#define UDS_SECUR_LEL_1				(uint8_t)0x01
-#define UDS_SECUR_LEL_FBL			(uint8_t)0x09
+#define UDS_SECURITY_LVL1			(uint8_t)0x01
+#define UDS_SECURITY_LVL1_OK		(uint8_t)0x02
+#define UDS_SECURITY_FBL			(uint8_t)0x09
+#define UDS_SECURITY_FBL_OK			(uint8_t)0x0A
 
 #define UDS_FIRSR_FRAME_MAX_LEN     (uint8_t)6
 

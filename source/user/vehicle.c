@@ -46,17 +46,14 @@ static uint8_t busoffCount = 0;
 static uint8_t VHCL_AlarmDetect(flexcan_frame_t *pFrame)
 {
     uint8_t alarmLevel_tmp = pFrame->dataByte4 >> 5;
-    Data_Message_T msg;
     if(alarmLevel_tmp == ALARM_LEVEL3)
     {
-        if(alarmLevel_tmp == alarmLevel)
+        if(ALARM_LEVEL3 != alarmLevel)
         {
             //Detect the level 3 alarm first time,
-            //send the alrm event to record_task
-            
-            msg.parts.msg = RECORD_EVT_ALARM;
-            msg.parts.data = LEVEL3_ALARM_ASSERT;
-            OS_Send_Message(OS_IOT_TASK, msg.all);
+            //send the alarm event to record_task
+        	alarmLevel = ALARM_LEVEL3;
+        	OS_Send_MessageISR(OS_RECORD_TASK, Build_Message(RECORD_EVT_ALARM, LEVEL3_ALARM_ASSERT));
         }
     }
     else
@@ -64,9 +61,8 @@ static uint8_t VHCL_AlarmDetect(flexcan_frame_t *pFrame)
         if(alarmLevel == ALARM_LEVEL3)
         {
             //Level 3 alarm deassert first time
-            msg.parts.msg = RECORD_EVT_ALARM;
-            msg.parts.data = LEVEL3_ALARM_ASSERT;
-            OS_Send_Message(OS_IOT_TASK, msg.all);
+        	alarmLevel = 0;
+        	OS_Send_MessageISR(OS_RECORD_TASK,Build_Message(RECORD_EVT_ALARM, LEVEL3_ALARM_DEASSERT));
         }
     }
     return alarmLevel_tmp;
@@ -263,6 +259,11 @@ const flexcan_frame_t* VHCL_CAN_GetDataList(void)
 void VHCL_CAN_GiveDataList(void)
 {
     xSemaphoreGive(canDataTbl.xSemaphore);
+}
+
+void VHCL_CAN_ResetDataList(void)
+{
+	memset(&canDataTbl.canData, 0, sizeof(canDataTbl.canData));
 }
 /*******************************************************************************
 *    Function: VHCL_GetCanDataById
