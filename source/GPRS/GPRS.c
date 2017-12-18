@@ -4,7 +4,8 @@
 #include "board.h"
 #include "timers.h"
 #include "prj_config.h"
-#include "MKS22F12.h"
+#include "str_lib.h"
+#include <stdio.h>
 /****
  *define
  *****/
@@ -12,11 +13,26 @@
 #define EVENT_MAX_CNT 12
 #define RX_DATA_MAX_CNT 4
 #define TX_DATA_MAX_CNT 4
+
+#define TCP_CONTEXT_ID	0
+#define FTP_CONTEXT_ID	1
+//#define UDP_CONTEXT_ID	3
+#define CONTEXT_NUM		2
+
+#define POWERKEY_PULL_UP()  (void)0
+#define POWERKEY_PULL_DOWN() (void)(0) 
+#define GET_MODULE_POEWR_STATE() 1
+#define POWER_SOURCE_ON() (void)(0)
+#define POWER_SOURCE_OFF() (void)(0)
+
+#if 0
 #define POWERKEY_PULL_UP()  IO_GSM_PWR_ON_OUT(0)	
 #define POWERKEY_PULL_DOWN() IO_GSM_PWR_ON_OUT(1) 
 #define GET_MODULE_POEWR_STATE() IO_GSM_STAUS()
 #define POWER_SOURCE_ON() IO_4V_CTRL_OUT(1)
 #define POWER_SOURCE_OFF() IO_4V_CTRL_OUT(0)
+#endif
+
 #define TASK_WAIT_MASK_TIME 20
 #define MAX_MODLE_CMD_LEN 128
 #define MAX_SEND_FAIL_CNT 3
@@ -118,6 +134,16 @@ typedef struct
 	uint8_t *pData;
 }Event_t;
 
+/* context table */
+typedef struct
+{
+	struct
+	{
+		uint8_t contextId : 4; //0-15 map to  1-16
+		uint8_t contextState : 2; //0 Deactivated; 1 Activated; 2 disable
+	};
+	uint8_t ip[4];
+}context_t;
 /* net sesion's information */
 typedef struct
 {
@@ -126,7 +152,9 @@ typedef struct
 	uint16_t port;
 	netSesionState_t state;
 	bool isActive;
+	context_t *context;
 }netSessionInfo_t;
+
 
 /* express the module state */
 typedef enum
@@ -221,6 +249,18 @@ static FnRet_t QueryCgattHandler(uint8_t *pData);
 /***
  ** Local variable
  **/
+static context_t context[CONTEXT_NUM] =
+{
+		{
+				.contextId = 0, // context id 1 map to TCP context
+				.contextState = 0, // context id state
+		},
+		{
+				.contextId = 1, // context id 1 map to TCP context
+				.contextState = 2, //disable
+		},
+
+};
 static  netSessionInfo_t netSesionTbl[] = 
 {
 	{
@@ -229,14 +269,25 @@ static  netSessionInfo_t netSesionTbl[] =
 		.port = 30032,
 		.type = (uint8_t *)"TCP",
 		.state = ipSesionClose,
-        .isActive = true
+        .isActive = true,
+		.context = &context[TCP_CONTEXT_ID],
 	},
 	{
 		.pHost = "101.37.87.65",
 		.port = 30032,
 		.type = (uint8_t *)"TCP",
 		.state = ipSesionClose,
-        .isActive = false
+        .isActive = false,
+		.context = &context[TCP_CONTEXT_ID],
+
+	},
+	{
+		.pHost = "101.37.87.65",
+		.port = 21,
+		.type = (uint8_t *)"FTP",
+		.state = ipSesionClose,
+        .isActive = false,
+		.context = &context[FTP_CONTEXT_ID],
 	}
 };
 static moduleInfo_t moduleInfo;
@@ -773,6 +824,7 @@ static FnRet_t cmdSend(uint8_t *pCmd, uint16_t cmdLen, uint32_t timeOut,
 		return ret_fatal_err;
 	}
 	return ret_sucess;
+
 }
 
 /* check the at command queue periodically, if find command item,send it */
@@ -908,23 +960,37 @@ static FnRet_t commonRespDecoder(uint8_t *pResp)
 	return ret_fail;
 }
 
+static FnRet_t isSimCardReady(uint8_t *pResp)
+{
+	if(!memcmp(pResp, "OK", 2))
+	{
+		if(localFlag.isSimReady == 1)
+		{
+			return ret_sucess;
+		}
+	}
+	DEBUG(DEBUG_HIGH,"[IOT] SIM card not ready");
+
+	return ret_fail;
+}
+
 static FnRet_t iccidDeocder(uint8_t *pResp)
 {
     if(pResp == NULL)
     {
         return  ret_fail;
     }
-    if(strlen((char *)pResp) == HEX_ICCID_LEN*2)
+    if(memcmp(pResp, "OK", 2))
+    {
+        return ret_sucess;
+    }
+    if(strlen((char *)&pResp[strlen("+QCCID: ")]) == HEX_ICCID_LEN*2)
     {
         uint8_t idx;
         for(idx=0; idx<HEX_ICCID_LEN; idx++)
         {
             moduleInfo.iccid[idx] = StrtoHex(&pResp[2*idx]);
         }
-    }
-    if(memcmp(pResp, "OK", 2))
-    {
-        return ret_sucess;
     }
     return ret_fail;
 }
@@ -935,6 +1001,10 @@ static FnRet_t imeiDeocder(uint8_t *pResp)
     {
         return  ret_fail;
     }
+    if(memcmp(pResp, "OK", 2))
+    {
+        return ret_sucess;
+    }
     if(strlen((char *)pResp) == HEX_IMEI_LEN * 2 - 1)
     {
         uint8_t idx;
@@ -944,11 +1014,29 @@ static FnRet_t imeiDeocder(uint8_t *pResp)
             moduleInfo.imei[idx] = StrtoHex(&pResp[2*idx]);
         }
     }
-    if(memcmp(pResp, "OK", 2))
-    {
-        return ret_sucess;
-    }
     return ret_fail;
+}
+
+static FnRet_t imsiDecoder(uint8_t *pResp)
+{
+	if(pResp == NULL)
+	{
+		return  ret_parm_err;
+	}
+	if(memcmp(pResp, "OK", 2))
+	{
+		return ret_sucess;
+	}
+	if(strlen((char *)pResp) == HEX_IMSI_LEN * 2 - 1)
+	{
+		uint8_t idx;
+		pResp[HEX_IMSI_LEN * 2 - 1] = 'f'; //
+		for(idx=0; idx<HEX_IMSI_LEN; idx++)
+		{
+			moduleInfo.imsi[idx] = StrtoHex(&pResp[2*idx]);
+		}
+	}
+	return ret_fail;
 }
 
 static FnRet_t echoCloseDecoder(uint8_t *pResp)
@@ -1032,6 +1120,20 @@ static FnRet_t cifsrRespDecoder(uint8_t *pResp)
 	if(ownIp[0] == 10)
 	{
 		return ret_sucess;
+	}
+	return ret_fail;
+}
+
+/* Query the status of the context profile */
+static FnRet_t QueryContextProfile(uint8_t *pResp)
+{
+	if(pResp == NULL)
+	{
+		return ret_parm_err;
+	}
+	if(!memcmp(pResp, "+QIACT:", strlen("+QIACT:")))
+	{
+
 	}
 	return ret_fail;
 }
@@ -1140,6 +1242,7 @@ static FnRet_t waitCloseOk(uint8_t *pData)
 	}
     return ret_fail;
 }
+
 #if 0
 /* check power down */
 static FnRet_t waitPowerDownOk(uint8_t *pData)
@@ -1489,24 +1592,35 @@ static FnRet_t powerDownByCommand(void)
 	return ret_sucess;    
 }
 #endif
+
 static FnRet_t netInit(void)
 {
-	uint8_t cmd[64] = "";
-	cmdSend("AT+IPR=115200\r\n",strlen("AT+IPR=115200\r\n"),500,1,commonRespDecoder);
+#define MAX_CMD_LEN 128
+	uint8_t cmd[MAX_CMD_LEN] = "";
+	/* Use ATV1 to set the response format */
+	cmdSend("ATV1\r\n",strlen("ATV1\r\n"),300,1,commonRespDecoder);
+	/* Use AT+CMEE=2 to enable result code and use verbose values */
+	cmdSend("AT+CMEE=2\r\n",strlen("AT+CMEE=2\r\n"),300,1,commonRespDecoder);
+	/* Set baudrate */
+	cmdSend("AT+IPR=115200\r\n",strlen("AT+IPR=115200\r\n"),300,1,commonRespDecoder);
+	/* Use AT+GSN to query the IMEI of module */
+    cmdSend("AT+GSN\r\n",strlen("AT+GSN\r\n"),300,1,imeiDeocder);
+    /* Use AT+CPIN? to query the SIM card status : SIM card inserted or not, locked or unlocked */
+    cmdSend("AT+CPIN?\r\n", strlen("AT+CPIN?\r\n"),300,100,isSimCardReady);
+    /* Use AT+CIMI to query the IMSI of SIM card */
+    cmdSend("AT+CIMI\r\n", strlen("AT+CIMI\r\n"), 300, 1, imsiDecoder);
+    cmdSend("AT+QCCID\r\n",strlen("AT+QCCID\r\n"),2000,1,iccidDeocder);
 
-	cmdSend("AT+CSQ\r\n", strlen("AT+CSQ\r\n"), 500, 500, csqCheckDecoder);
-    cmdSend("AT+CCID\r\n",strlen("AT+CCID\r\n"),2000,1,iccidDeocder);
-    cmdSend("AT+GSN\r\n",strlen("AT+GSN\r\n"),500,1,imeiDeocder);    
-	localFlag.isMulti = 1;	
-	cmdSend("AT+CREG?\r\n", strlen("AT+CREG?\r\n"), 500, 500, checkNetWorkRegest);	
+    cmdSend("AT+QURCCFG=\"URCPORT\",\"uart1\"\r\n",strlen("AT+QURCCFG=\"URCPORT\",\"uart1\"\r\n"),300,1,commonRespDecoder);
 	cmdSend("AT+CGREG?\r\n", strlen("AT+CGREG?\r\n"), 500, 500, checkGprsRegest);	
-	cmdSend("AT+CGATT?\r\n", strlen("AT+CGATT?\r\n"), 500, 500, cgattRespDecoder);
-	cmdSend("AT+CIPMUX=1\r\n", strlen("AT+CIPMUX=1\r\n"), 500, 1, commonRespDecoder);
-	sprintf((char *)cmd, "AT+CSTT=\"%s\"\r\n", (char *)"CMNET");
-	cmdSend(cmd, strlen((char *)cmd), 500, 1, commonRespDecoder);
-	cmdSend("AT+CIICR\r\n",strlen("AT+CIICR\r\n"), 85000, 1, commonRespDecoder);
-	cmdSend("AT+CIFSR\r\n", strlen("AT+CIFSR\r\n"), 500, 1, cifsrRespDecoder);
-
+//	localFlag.isMulti = 1;
+	memset(cmd, 0, MAX_CMD_LEN);
+	snprintf((char *)cmd, MAX_CMD_LEN, "AT+QICSGP=%d,1,%s,\"\",\"\",0\r\n",context[0].contextId,"IONET");
+	cmdSend(cmd, strlen((char *)cmd),300,1,commonRespDecoder);
+	memset(cmd, 0, MAX_CMD_LEN);
+	snprintf((char *)cmd, MAX_CMD_LEN, "AT+QIACT=%d\r\n",netSesionTbl[0].context->contextId,"IONET");
+	cmdSend("AT+QIACT=1\r\n", strlen("AT+QIACT=1\r\n"), 150000, 1, commonRespDecoder);
+	//cmdSend("AT+QIACT?\r\n", strlen("AT+QIACT?\r\n"),150000, 1, QueryContextProfile);
 	cmdSend("ATE0\r\n", strlen("AT0\r\n"), 500, 1, echoCloseDecoder);
 	return ret_sucess;
 }
@@ -2176,6 +2290,17 @@ bool IOT_IpClose(uint8_t channel)
 	}
 	ModuleCloseSesion(channel);
 	netSesionTbl[channel].isActive = false;
+	return true;
+}
+
+bool IOT_IpReconnect(uint8_t channel)
+{
+	if(channel >= netSesionNum)
+	{
+		return false;
+	}
+	ModuleCloseSesion(channel);
+	netSesionTbl[channel].isActive = true;
 	return true;
 }
 
