@@ -305,7 +305,7 @@ static bool diag_uds_sessionControl()
  *    Function: diag_uds_SA_extenedRequesetSeed
  *  Parameters: 'mode' express the security access mode
  *     Returns: None
- * Description: handle the requestion of request for seed in extend session mode
+ * Description: handle the request of request for seed in extend session mode
  *********************************************************************/
 static bool diag_uds_SA_reequesetSeed(uint8_t mode)
 {
@@ -357,7 +357,7 @@ static bool diag_uds_SA_reequesetSeed(uint8_t mode)
  *    Function: diag_uds_SA_extenedVerificationKey
  *  Parameters: 'mode' express the security access mode
  *     Returns: None
- * Description: verificate the key in extend session mode
+ * Description: verify the key in extend session mode
  *********************************************************************/
 static bool diag_uds_SA_VerificationKey(uint8_t mode)
 {
@@ -381,7 +381,7 @@ static bool diag_uds_SA_VerificationKey(uint8_t mode)
     }
     if(uds_securityLevel != mode)
     {
-        //the sequence of requestion is error
+        //the sequence of request is error
         diag_uds_errorHandle(uds_rx_buffer.payload[0], 0x22);
         return false;
     }
