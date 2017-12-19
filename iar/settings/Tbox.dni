@@ -200,10 +200,11 @@ ProbeSetup0=2 1 1 2 0 0
 [Disassemble mode]
 mode=0
 [Breakpoints2]
-Bp0=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\TelmProtocol.c}.687.9" 0 0 1 "" 0 "" 0
-Bp1=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.637.5" 0 0 1 "" 0 "" 0
-Bp2=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.2094.2" 0 0 1 "" 0 "" 0
-Count=3
+Bp0=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.2283.1" 0 0 1 "" 0 "" 0
+Bp1=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.2283.1" 0 0 1 "" 0 "" 0
+Bp2=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.1286.24" 0 0 1 "" 0 "" 0
+Bp3=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.1280.7" 0 0 1 "" 0 "" 0
+Count=4
 [Aliases]
 A0=_ "D:\workspace\TBOX-hengyi\firmware\code0921\devices\MKS22F12\iar\startup_MKS22F12.s" ""
 Count=1
