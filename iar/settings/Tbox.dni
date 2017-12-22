@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=689906917
+Checksum=468433811
 [CodeCoverage]
 Enabled=_ 0
 [Exceptions]
@@ -176,15 +176,6 @@ ShowTimeLog=1
 SumEnabled=0
 ShowTimeSum=1
 SumSortOrder=0
-[Disassemble mode]
-mode=0
-[Breakpoints2]
-Bp0=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.2397.1" 0 0 1 "" 0 "" 0
-Bp1=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.2397.1" 0 0 1 "" 0 "" 0
-Bp2=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.1286.38" 0 0 1 "" 0 "" 0
-Bp3=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.1280.7" 0 0 1 "" 0 "" 0
-Bp4=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.1345.5" 0 0 1 "" 0 "" 0
-Count=5
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
@@ -192,10 +183,6 @@ Category=_ 0
 [TermIOLog]
 LoggingEnabled=_ 0
 LogFile=_ ""
-[Aliases]
-A0=_ "D:\workspace\TBOX-hengyi\firmware\code0921\devices\MKS22F12\iar\startup_MKS22F12.s" ""
-Count=1
-SuppressDialog=0
 [DriverProfiling]
 Enabled=0
 Mode=1
@@ -210,3 +197,16 @@ ShowTiming=1
 Frequency=10000
 Probe0=I0
 ProbeSetup0=2 1 1 2 0 0
+[Disassemble mode]
+mode=0
+[Breakpoints2]
+Bp0=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.2400.2" 0 0 1 "" 0 "" 0
+Bp1=_ 0 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.2400.2" 0 0 1 "" 0 "" 0
+Bp2=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.1288.5" 0 0 1 "" 0 "" 0
+Bp3=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.1280.3" 0 0 1 "" 0 "" 0
+Bp4=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.1535.17" 0 0 1 "" 0 "" 0
+Count=5
+[Aliases]
+A0=_ "D:\workspace\TBOX-hengyi\firmware\code0921\devices\MKS22F12\iar\startup_MKS22F12.s" ""
+Count=1
+SuppressDialog=0
