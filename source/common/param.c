@@ -142,7 +142,7 @@ bool Get_Manufacture_Setting(DevInfo_Sct_t *devinfo_sct)
     {
         return false ;
     }
-//    spi_flash_erase_all();
+    spi_flash_erase_all();
     spi_flash_read(FLASH_MANUFACTURE_SETTING_OFFSET, sizeof(DevInfo_Sct_t), devinfo_sct->byte);
     crc = crc_ccitt(crc, devinfo_sct->byte, sizeof(DevInfo_Sct_t) - 2) ;
 

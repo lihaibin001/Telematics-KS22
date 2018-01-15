@@ -7,7 +7,7 @@
       <type>*</type>
       <start_file>*</start_file>
       <end_file>*</end_file>
-      <action_debugger>0</action_debugger>
+      <action_debugger>1</action_debugger>
       <action_log>1</action_log>
     </filter>
   </filter_entries>

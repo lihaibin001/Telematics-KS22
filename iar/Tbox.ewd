@@ -1684,11 +1684,11 @@
         </option>
         <option>
           <name>MemFile</name>
-          <state></state>
+          <state>$TOOLKIT_DIR$\CONFIG\debugger\NXP\MKS22FN256xxx12.ddf</state>
         </option>
         <option>
           <name>RunToEnable</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>RunToName</name>
@@ -1724,11 +1724,11 @@
         </option>
         <option>
           <name>OCDynDriverList</name>
-          <state>ARMSIM_ID</state>
+          <state>JLINK_ID</state>
         </option>
         <option>
           <name>OCLastSavedByProductVersion</name>
-          <state></state>
+          <state>7.80.2.11970</state>
         </option>
         <option>
           <name>UseFlashLoader</name>
@@ -1752,7 +1752,7 @@
         </option>
         <option>
           <name>FlashLoadersV3</name>
-          <state></state>
+          <state>$TOOLKIT_DIR$\config\flashloader\NXP\FlashKxxFxxx48K.board</state>
         </option>
         <option>
           <name>OCImagesSuppressCheck1</name>
@@ -1820,7 +1820,7 @@
         </option>
         <option>
           <name>OCMulticoreNrOfCores</name>
-          <state></state>
+          <state>1</state>
         </option>
         <option>
           <name>OCMulticoreMaster</name>
@@ -2455,7 +2455,7 @@
         </option>
         <option>
           <name>JLinkInitialSpeed</name>
-          <state>1000</state>
+          <state>32</state>
         </option>
         <option>
           <name>CCDoJlinkMultiTarget</name>
@@ -2532,12 +2532,12 @@
         </option>
         <option>
           <name>CCJLinkInterfaceRadio</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>CCJLinkResetList</name>
           <version>6</version>
-          <state>5</state>
+          <state>7</state>
         </option>
         <option>
           <name>CCJLinkInterfaceCmdLine</name>
@@ -2602,7 +2602,7 @@
         </option>
         <option>
           <name>CCCpuClockEdit</name>
-          <state></state>
+          <state>72</state>
         </option>
         <option>
           <name>CCSwoClockAuto</name>
@@ -3236,7 +3236,7 @@
       </plugin>
       <plugin>
         <file>$TOOLKIT_DIR$\plugins\rtos\OpenRTOS\OpenRTOSPlugin.ewplugin</file>
-        <loadFlag>0</loadFlag>
+        <loadFlag>1</loadFlag>
       </plugin>
       <plugin>
         <file>$TOOLKIT_DIR$\plugins\rtos\Quadros\Quadros_EWB7_Plugin.ewplugin</file>

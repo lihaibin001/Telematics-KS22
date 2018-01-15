@@ -38,10 +38,6 @@ D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar/..\source\mbed_tls
 -I
 D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\.\middleware\dma_manager_2.0.0
 -I
-D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\..\source\diagnostic\Dcm
--I
-D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\..\source\diagnostic\include
--I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\arm\CMSIS\Include
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\arm\inc
@@ -83,10 +79,6 @@ D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\Can\sysdepend\KS22
 D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\mbed_tls
 -I
 D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\middleware\dma_manager_2.0.0
--I
-D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\diagnostic\Dcm
--I
-D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\diagnostic\include
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\arm\CMSIS\Include
 -DCPU_MKS22FN256VLL12=1

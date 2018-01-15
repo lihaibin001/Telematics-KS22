@@ -64,10 +64,10 @@
  *********************************************************************/
 #define TASK_RECORD_STACK_SIZE      700
 #define TASK_PSYNC_STACK_SIZE       200
-#define TASK_RELAYS_STACK_SIZE      200
+#define TASK_RELAYS_STACK_SIZE      250
 #define TASK_PERIODIC_STACK_SIZE    200
 #define TASK_DIAG_STACK_SIZE        200
-#define TASK_IOT_STACK_SIZE         200
+#define TASK_IOT_STACK_SIZE         300
 #define TASK_GPS_STACK_SIZE         200
 #define TASK_SENSOR_STACK_SIZE      200
 
