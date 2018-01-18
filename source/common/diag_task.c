@@ -50,8 +50,8 @@
 #define UDS_FC_WFT					(uint8_t)0
 
 /*USER DEFINITION*/
-#define UDS_RECEIVE_PAYLOAD_LENGTH  (uint8_t)(UDS_FC_BS * 8)
-#define UDS_SEND_DATA_LENGTH        (uint8_t)(UDS_FC_BS * 8)
+#define UDS_RECEIVE_PAYLOAD_LENGTH  (uint8_t)(UDS_FC_BS * 16)
+#define UDS_SEND_DATA_LENGTH        (uint8_t)(UDS_FC_BS * 16)
 /* UDS data type define */
 #define UDS_DATA_TYPE_SINGLE        (uint8_t)0
 #define UDS_DATA_TYPE_FIRST         (uint8_t)1
@@ -236,8 +236,7 @@ static uint8_t diag_uds_getSessionTypeBySecurityMode(uint8_t mode)
         case UDS_SECURITY_VENDER:
             return UDS_SESSION_TYPE_VENDER;
         default:
-            return UDS_SESSION_TYPE_DEFAULT;
-            
+            return UDS_SESSION_TYPE_DEFAULT;   
     }
 }
 

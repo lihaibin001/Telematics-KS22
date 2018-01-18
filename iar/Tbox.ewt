@@ -2643,6 +2643,18 @@
         <name>$PROJ_DIR$\..\source\GPRS\GPRS.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\source\GPRS\iotrecv.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\source\GPRS\iotrecv.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\source\GPRS\iotsend.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\source\GPRS\iotsend.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\source\GPRS\TelmProtocol.c</name>
       </file>
       <file>

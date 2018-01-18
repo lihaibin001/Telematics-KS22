@@ -329,7 +329,11 @@
           <state>$PROJ_DIR$/..\source\user</state>
           <state>$PROJ_DIR$/..\source\Can\sysdepend\KS22</state>
           <state>$PROJ_DIR$/..\source\mbed_tls</state>
-          <state>$PROJ_DIR$\.\middleware\dma_manager_2.0.0</state>
+          <state>$PROJ_DIR$\..\middleware\dma_manager_2.0.0</state>
+          <state>$PROJ_DIR$\..\source\uds-c\src</state>
+          <state>$PROJ_DIR$\..\source\uds-c\src\uds</state>
+          <state>$PROJ_DIR$\..\source\uds-c\deps\bitfield-c\src\</state>
+          <state>$PROJ_DIR$\..\source\uds-c\deps\isotp-c\src</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2307,6 +2311,18 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\source\GPRS\GPRS.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\source\GPRS\iotrecv.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\source\GPRS\iotrecv.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\source\GPRS\iotsend.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\source\GPRS\iotsend.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\source\GPRS\TelmProtocol.c</name>

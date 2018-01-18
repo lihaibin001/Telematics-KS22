@@ -56,7 +56,7 @@
 #endif
 /* define the timeout value of IOT task */
 #define TASK_WAIT_MAX_TIME 20
-/* define the maxmum length of the module's command */
+/* define the maximum length of the module's command */
 #define MAX_MODLE_CMD_LEN 128
 //#define MAX_SEND_FAIL_CNT 3
 /* if heartbeat overstep MAX_HEARTBEAT_CNT, reconnect */
@@ -99,6 +99,7 @@ typedef struct
     uint8_t *pUsr;
     uint8_t *pPwr;
     uint8_t *pUrc;
+    uint8_t *pName;
 }ftpInfo_t;
 
 typedef enum
@@ -337,7 +338,8 @@ static ftpInfo_t ftpInfo =
 {
     .pUsr = "derenftp",
     .pPwr = "deren@123",
-    .pUrc = "\\"
+    .pUrc = "\\",
+    .pName = "12.txt"
 };
 static uint8_t moduleState;
 static moduleInfo_t moduleInfo;
@@ -357,7 +359,7 @@ static TickType_t ipTransTimer;
 //SMS buffer
 //static QueueHandle_t MesageQueue;
 //FTP buffer
-//static QueueHandle_t RxFtpQueue;
+static QueueHandle_t RxFtpQueue;
 
 /* used to detect command excute timeout */
 static TickType_t cmdExecuteTime;
@@ -1311,7 +1313,32 @@ static FnRet_t ftpOpenDecoder(uint8_t *pData)
     return ret_fail;
 }
 
-/* Decode CSQ value */
+static FnRet_t ftpDownloadDecoder(uint8_t *pData)
+{
+	if(pData == NULL)
+	{
+		return ret_fail;
+	}
+	if(!memcmp(pData, "OK", 2))
+	{
+		return ret_pass;
+	}
+	if(!memcmp(pData, "+QFTPGET: ", 10))
+	{
+		uint16_t err = atoi(pData+10);
+		uint16_t protocal_err = atoi (strstr(pData+10,","));
+		if(err != 0)
+		{
+			DEBUG(DEBUG_HIGH, "[IOT] FTP get error. err:%d;prot_err:%d", err, protocal_err);
+			return ret_fail;
+		}
+		//get file from module's ram
+
+		return ret_sucess;
+	}
+}
+
+/* Decode CSQ valule*/
 static FnRet_t csqCheckDecoder(uint8_t *pData)
 {
     if(pData == NULL)
@@ -1479,26 +1506,6 @@ static void receiveChecker(void)
 						// echo, continue
 						continue ;
 					}
-#if 0 //how to hanle error message????
-					else if(!memcmp("ERROR", cmdBuff, strlen("ERROR")))
-					{
-						memset(cmdBuff, 0, MAX_MODLE_CMD_LEN);
-						localFlag.cmdState = 0;
-
-						cmdTryCnt = 0;
-						if(moduleState != StateRecover)
-						{
-							cleanAtCmdQueue();
-							moduleState = StateRecover;
-							ModuleSelfTeste();
-							ModuleRestart();
-							ModuleInit();
-							ModuleRecoverSesion();
-						}
-						//response error, reset module?
-						DEBUG(DEBUG_HIGH, "[IOT] ERROR\r\n");
-					}
-#endif
 					else
 					{
 						//decode response
@@ -1528,25 +1535,6 @@ static void receiveChecker(void)
 							{
 								continue;
 							}
-							else
-							{
-#if 0
-								if(xTaskGetTickCount() >= cmdExecuteTime)
-								{
-                                    if(cmdTryCnt > command.tryCnt)
-                                    {
-                                        cleanAtCmdQueue();
-                                        ModuleRestart();
-                                        ModuleInit();
-                                        ModuleRecoverSesion();
-                                        return ;
-                                    }
-									cmdExecuteTime = pdMS_TO_TICKS(command.timeOut) + xTaskGetTickCount();
-									cmdTryCnt++;
-								}
-#endif
-							}
-
 						}
 						else
 						{
@@ -1700,14 +1688,6 @@ static FnRet_t csqCheck(void)
 	return ret_sucess;
 }
 
-#if 0
-static FnRet_t powerDownByCommand(void)
-{
-	cmdSend("AT+CPOWD=1\r\n",strlen("AT+CPOWD=1\r\n"),5000,1,waitPowerDownOk);
-	return ret_sucess;    
-}
-#endif
-
 static FnRet_t reconnectSesion(uint8_t num)
 {
     FnRet_t ret;
@@ -1772,7 +1752,7 @@ static FnRet_t netInit(void)
     return ret_sucess;
 }
 
-static FnRet_t ftpDownload(void)
+static FnRet_t ftpInit(void)
 {
     uint8_t cmd[MAX_CMD_LEN] = "";
     /* configure the ftp PDP context */
@@ -1809,10 +1789,17 @@ static FnRet_t ftpDownload(void)
     //cmdSend("AT+QFTPCFG=\"sslctxid\",1", strlen("AT+QFTPCFG=\"sslctxid\",1"),CMD_COMMON_INTERVAL, 1, commonRespDecoder);   
     //cmdSend("AT+QSSLCFG=\"ciphersuite\",1, 0xffff", strlen("AT+QSSLCFG=\"ciphersuite\",1, 0xffff"),CMD_COMMON_INTERVAL, 1, commonRespDecoder);
     //cmdSend("AT+QSSLCFG=\"seclevel\",1,0",strlen("AT+QSSLCFG=\"seclevel\",1,0"),CMD_COMMON_INTERVAL, 1, commonRespDecoder);
-    ///cmdSend("AT+QSSLCFG=\"sslversion\",1,1", strlen("AT+QSSLCFG=\"sslversion\",1,1"), CMD_COMMON_INTERVAL, 1, commonRespDecoder);
+    //cmdSend("AT+QSSLCFG=\"sslversion\",1,1", strlen("AT+QSSLCFG=\"sslversion\",1,1"), CMD_COMMON_INTERVAL, 1, commonRespDecoder);
     snprintf((char *)cmd, MAX_CMD_LEN, "AT+QFTPOPEN=\"%s\",%d\r\n", netSesionTbl[FTP_SESION_NUM].pHost,netSesionTbl[FTP_SESION_NUM].port);
     cmdSend(cmd, strlen((char *)cmd), CMD_COMMON_INTERVAL, 1, ftpOpenDecoder);
     return ret_sucess;
+}
+
+static FnRet_t ftpDownLoad(uint32_t offset, uint16_t size)
+{
+    uint8_t cmd[MAX_CMD_LEN] = "";
+    snprintf((char *)cmd, MAX_CMD_LEN, "AT+QFTPGET=\"%s\",\"COM:\"%d,%d\r\n",ftpInfo.pName,offset, size);
+    cmdSend(cmd, strlen((char *)cmd), CMD_COMMON_INTERVAL, 1, ftpDownloadDecoder);
 }
 
 static FnRet_t activateContext(uint8_t num)
@@ -1860,14 +1847,6 @@ static void ipTransmitter(void)
 	{
 		return ;
 	}
-#if 0
-	if(linkDetecter[data.channel].heartbeat >= MAX_HEARTBEAT_CNT)
-	{
-		//check current session state
-		ModuleCloseSesion(data.channel);
-		return ;
-	}
-#endif
 	if(!netSesionTbl[data.channel].isActive)
 	{
 		if(xQueueReceive(TxDataQueue, &data, pdMS_TO_TICKS(100)) != pdPASS)
@@ -1976,7 +1955,6 @@ static FnRet_t moduleIpDataReveiveHandle(void *pParm)
 		DEBUG(DEBUG_HIGH, "[IOT] sesion num error\r\n");
 	}
 
-
     if(xQueueReceive(RxDataQueue[sesionNum], &data, 0) == pdPASS)
     {
         if(data.pData != NULL)
@@ -1990,7 +1968,6 @@ static FnRet_t moduleIpDataReveiveHandle(void *pParm)
             return ret_sucess;
         }
     }
-
 	return ret_fail;
 }
 
@@ -2022,7 +1999,6 @@ static FnRet_t moduleCloseSesionHandle(void *pParm)
 }
 
 /* URC handle */
-
 static FnRet_t UrcFatalHandler(uint8_t *pData)
 {
     if(moduleState <= StatePowerOn)
@@ -2049,100 +2025,6 @@ static FnRet_t UrcConnectedHandler(uint8_t *pData)
 	}
 	return ret_sucess;
 }
-#if 0
-static FnRet_t UrcDisConnectedHandler(uint8_t *pData)
-{
-	uint8_t sesionNum = 0;
-	//cleanTxDataQueue();
-#if 0
-	//reconnect
-	if(moduleState != StateRecover)
-	{
-		if(linkDetecter[sesionNum].reconnectCnt >= MAX_RECONNECT_CNT)
-		{
-#if 0
-			uint8_t idx=0;
-
-			for(idx=0; idx<netSesionNum; idx++)
-			{
-				linkDetecter[idx].reconnectCnt = 0;
-				linkDetecter[idx].heartbeat = 0;
-			}
-#endif
-			memset(linkDetecter, 0, sizeof(linkDetecter));
-			moduleState = StateRecover;
-			ModuleRestart();
-			localFlag.cmdState = 0;
-			cleanAtCmdQueue();
-			ModuleInit();
-			ModuleRecoverSesion();
-		}
-		else
-		{
-			ModuleIpOpen(sesionNum);
-		}
-	}
-	netSesionTbl[sesionNum].state = ipSesionClose;
-    if(ipOperateCb)
-    {
-        ipOperateCb(false, sesionNum);
-    }
-#endif
-	return ret_sucess;
-}
-static FnRet_t UrcReceivedHandler(uint8_t *pData)
-{
-	uint8_t len = strlen("+RECEIVE,");
-	localFlag.isNetReceving = true;
-	pData+=len;
-	if(*pData >= '0' && *pData <= '9')
-	{
-		RxingSesion = (uint8_t)atoi((char *)pData);
-	}
-	else
-	{
-		DEBUG(DEBUG_HIGH, "[MBCOM] Parse +RECEIVE error\r\n");
-		return ret_fail;
-	}
-	while(*pData != ',' && *pData != 0)
-	{
-		pData++;
-	}
-	if(*pData != 0)
-	{
-		pData++;
-		RxTmp.dataLen = (uint16_t)atoi((char *)pData);
-	}
-	else
-	{
-		RxTmp.dataLen = 0;
-		DEBUG(DEBUG_HIGH, "[MBCOM] Parse +RECEIVE error\r\n");
-		return ret_fail;        
-	}
-	RxTmp.pData = pvPortMalloc(RxTmp.dataLen);
-	ipRxDataIdx = 0;
-	if(RxTmp.pData == NULL)
-	{
-		RxTmp.dataLen = 0;
-		DEBUG(DEBUG_HIGH, "[MBCOM] Malloc rx data error\r\n");
-		return ret_fail;  
-	}
-	return ret_sucess;
-}
-
-static FnRet_t UrcPdpDeactHandler(uint8_t *pData)
-{
-#if 0
-    if(moduleState == StateAttached)
-    {
-        cleanAtCmdQueue();
-        moduleDeactive();
-    }
-	moduleInit();
-#endif
-	return ret_sucess;
-}
-#endif
 static FnRet_t UrcCreghandler(uint8_t *pData)
 {
 	if(pData[9] == '1' || pData[9] == '5')

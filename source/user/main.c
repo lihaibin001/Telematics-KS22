@@ -32,6 +32,7 @@
 /*!
  * @brief Main function
  */
+
 int main(void)
 {
     if (kRCM_SourceWakeup & RCM_GetPreviousResetSources(RCM)) /* Wakeup from VLLS. */
@@ -39,7 +40,7 @@ int main(void)
         PMC_ClearPeriphIOIsolationFlag(PMC);
         NVIC_ClearPendingIRQ(LLWU_IRQn);
     }
-    BOARD_BootClockHSRUN();   
+    BOARD_BootClockHSRUN();
     OS_Start();
 }
 

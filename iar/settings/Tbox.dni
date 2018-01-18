@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=-710214209
+Checksum=360730725
 [CodeCoverage]
 Enabled=_ 0
 [Exceptions]
@@ -203,8 +203,7 @@ ProbeSetup0=2 1 1 2 0 0
 [Disassemble mode]
 mode=0
 [Breakpoints2]
-Bp0=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\source\GPRS\GPRS.c}.1128.25" 0 0 1 "" 0 "" 0
-Count=1
+Count=0
 [Aliases]
 A0=_ "D:\workspace\TBOX-hengyi\firmware\code0921\devices\MKS22F12\iar\startup_MKS22F12.s" ""
 Count=1

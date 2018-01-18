@@ -36,7 +36,15 @@ D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar/..\source\Can\sysdepend\KS22
 -I
 D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar/..\source\mbed_tls
 -I
-D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\.\middleware\dma_manager_2.0.0
+D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\..\middleware\dma_manager_2.0.0
+-I
+D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\..\source\uds-c\src
+-I
+D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\..\source\uds-c\src\uds
+-I
+D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\..\source\uds-c\deps\bitfield-c\src
+-I
+D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\..\source\uds-c\deps\isotp-c\src
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\arm\CMSIS\Include
 -I
@@ -78,7 +86,15 @@ D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\Can\sysdepend\KS22
 -I
 D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\mbed_tls
 -I
-D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\middleware\dma_manager_2.0.0
+D:\workspace\TBOX-hengyi\firmware\codeV2.0\middleware\dma_manager_2.0.0
+-I
+D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\uds-c\src
+-I
+D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\uds-c\src\uds
+-I
+D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\uds-c\deps\bitfield-c\src
+-I
+D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\uds-c\deps\isotp-c\src
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\arm\CMSIS\Include
 -DCPU_MKS22FN256VLL12=1
@@ -307,7 +323,6 @@ C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\arm\CMSIS\Include
 -D__STDC__=1
 -D__STDC_VERSION__=199901L
 -D__STDC_HOSTED__=1
--D__STDC_NO_VLA__=1
 -D__STDC_NO_ATOMICS__=1
 -D__EDG_IA64_ABI=1
 -D__EDG_IA64_ABI_VARIANT_CTORS_AND_DTORS_RETURN_THIS=1
