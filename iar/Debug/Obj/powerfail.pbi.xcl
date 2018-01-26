@@ -38,13 +38,9 @@ D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar/..\source\mbed_tls
 -I
 D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\..\middleware\dma_manager_2.0.0
 -I
-D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\..\source\uds-c\src
+D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\..\source\uds\Dcm
 -I
-D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\..\source\uds-c\src\uds
--I
-D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\..\source\uds-c\deps\bitfield-c\src
--I
-D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\..\source\uds-c\deps\isotp-c\src
+D:\workspace\TBOX-hengyi\firmware\codeV2.0\iar\..\source\autosarInclude
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\arm\CMSIS\Include
 -I
@@ -88,13 +84,9 @@ D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\mbed_tls
 -I
 D:\workspace\TBOX-hengyi\firmware\codeV2.0\middleware\dma_manager_2.0.0
 -I
-D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\uds-c\src
+D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\uds\Dcm
 -I
-D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\uds-c\src\uds
--I
-D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\uds-c\deps\bitfield-c\src
--I
-D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\uds-c\deps\isotp-c\src
+D:\workspace\TBOX-hengyi\firmware\codeV2.0\source\autosarInclude
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5\arm\CMSIS\Include
 -DCPU_MKS22FN256VLL12=1

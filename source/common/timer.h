@@ -58,6 +58,7 @@ typedef enum
     GPRS_START_TIMER,
     PS_DEV_ON_TIMER,
     DEV_TRACE_TIMER, // for device trace.
+	DIAG_BASE_TIMER,
     //DEV_WAKE_TIMER, // wait 1 minute, then sleep
     //GPS_UPLOAD_TIMER, // wait for 45s to upload GPS
     

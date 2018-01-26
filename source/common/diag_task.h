@@ -35,6 +35,7 @@ typedef  enum  Diag_Events_Tag
 {
 	DIAG_EVT_NOP,
     DIAG_EVT_UDS_EVT,
+	//DIAG_EVT_DTC_
    	DIAG_NUM_EVENTS
 } Diag_Events_Type;
 

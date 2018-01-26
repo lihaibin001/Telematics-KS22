@@ -330,10 +330,8 @@
           <state>$PROJ_DIR$/..\source\Can\sysdepend\KS22</state>
           <state>$PROJ_DIR$/..\source\mbed_tls</state>
           <state>$PROJ_DIR$\..\middleware\dma_manager_2.0.0</state>
-          <state>$PROJ_DIR$\..\source\uds-c\src</state>
-          <state>$PROJ_DIR$\..\source\uds-c\src\uds</state>
-          <state>$PROJ_DIR$\..\source\uds-c\deps\bitfield-c\src\</state>
-          <state>$PROJ_DIR$\..\source\uds-c\deps\isotp-c\src</state>
+          <state>$PROJ_DIR$\..\source\uds\Dcm</state>
+          <state>$PROJ_DIR$\..\source\autosarInclude</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2313,18 +2311,6 @@
         <name>$PROJ_DIR$\..\source\GPRS\GPRS.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\source\GPRS\iotrecv.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\source\GPRS\iotrecv.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\source\GPRS\iotsend.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\source\GPRS\iotsend.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\source\GPRS\TelmProtocol.c</name>
       </file>
       <file>
@@ -2423,6 +2409,42 @@
       <file>
         <name>$PROJ_DIR$\..\source\SysMan\system.h</name>
       </file>
+    </group>
+    <group>
+      <name>uds</name>
+      <group>
+        <name>Dcm</name>
+        <file>
+          <name>$PROJ_DIR$\..\source\uds\Dcm\Dcm.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\source\uds\Dcm\Dcm_Dsd.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\source\uds\Dcm\Dcm_Dsl.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\source\uds\Dcm\Dcm_Dsp.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\source\uds\Dcm\Dcm_Internal.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\source\uds\Dcm\Rte_Dcm.h</name>
+        </file>
+      </group>
+      <group>
+        <name>Dem</name>
+        <file>
+          <name>$PROJ_DIR$\..\source\uds\Dem\Dem.c</name>
+        </file>
+      </group>
+      <group>
+        <name>Det</name>
+        <file>
+          <name>$PROJ_DIR$\..\source\uds\Det\Det.c</name>
+        </file>
+      </group>
     </group>
     <group>
       <name>user</name>

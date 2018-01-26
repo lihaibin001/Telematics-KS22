@@ -14,16 +14,15 @@ typedef void (*ipSendCb)(bool isSendOk, uint8_t sesionNum);
 typedef void (*ipRxDataHanle)(uint8_t *pData, uint16_t len, uint8_t sesinoNum);
 typedef void (*ipConnectCb)(bool state, uint8_t sesinoNum);
 /*net sesion's state */
-typedef enum
-{
+typedef enum {
 //	ipSesionInactive,
-    ipSesionClosing,
+	ipSesionClosing,
 	ipSesionClose,
 	ipSesionOpening,
 	ipSesionOpened,
 //	ipSesionIdle,
 //	ipSesionTransmit,
-}netSesionState_t;
+} netSesionState_t;
 
 TaskHandle_t IOT_Gethandle(void);
 void IOT_Task(void *pParm);
